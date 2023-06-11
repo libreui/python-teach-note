@@ -24,12 +24,17 @@ print("""
 """)
       
 # 创建主角
+name = "name"   # 名字键名
+hp = "hp"       # 血量键名       
+mp = "mp"       # 魔法值键名
+attack = "attack"   # 攻击力键名
+skills = "skills"   # 技能键名
 my = {
-    "name": "张无忌",
-    'hp': 200,
-    'mp': 100,
-    'attack': 10,
-    'skills': {
+    name: "张无忌",
+    hp: 100,
+    mp: 100,
+    attack: 10,
+    skills: {
         "华山剑法": {'attack': 10, 'mp': 10},
         "独孤九剑": {'attack': 20, 'mp': 20},
         "葵花宝典": {'attack': 30, 'mp': 30}
@@ -37,14 +42,51 @@ my = {
 }
 
 # 测试主角
-print('---测试主角--------------------------')
-print("名字：%s\t" % my["name"])
-print("血量：%d\t" % my["hp"])
-print("魔法: %d\t" % my["mp"])
-print("攻击力：%d \t" % my["attack"])
-print("技能：")
-for k,v in my["skills"].items():
-    print("\t%s：%s" % (k, v))
-print("-----------------------------------")
+# print('---测试主角--------------------------')
+# print("名字：%s\t" % my[name])
+# print("血量：%d\t" % my[hp])
+# print("魔法: %d\t" % my[mp])
+# print("攻击力：%d \t" % my[attack])
+# print("技能：")
+# for k,v in my[skills].items():
+#     print("\t%s：%s" % (k, v))
+# print("-----------------------------------")
+
+
+# 定义NPC敌人
+
+# NPC列表
+enemys = [
+    {name: "东方不败",hp: 0,attack: 10},
+    {name: "岳不群",hp: 0,attack: 20},
+    {name: "任我行",hp: 0,attack: 30}
+]
+
+# 测试代码
+# print("---测试敌人-------------------------")
+# for i in range(len(enemys)):
+#     print("{1}.{0[name]}: 生命:{0[hp]}, 攻击力:{0[attack]}".format(enemys[i], i))
+# print("----------------------------------")
+
+
+# 开始游戏回合
+# 游戏结束的条件：我方生命0或者敌人生命之和为0
+while True:
+    # 每一个回合代码
+
+    # 判断游戏结束
+    enemy_hp_sum = 0
+    # 获取敌人hp总和
+    for enemy in enemys:
+        enemy_hp_sum += enemy[hp]
+    
+    if my[hp] <= 0 or enemy_hp_sum <= 0:
+        break;
+
+# 判断游戏胜利或者失败
+if my[hp] > 0 and enemy_hp_sum <= 0:
+    print("主角胜利")
+else:
+    print("敌人胜利")
 
 # 初始化 END
