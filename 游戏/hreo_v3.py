@@ -26,16 +26,20 @@ print("""
 你决定踏上寻找屠龙宝刀的道路
 ......
 """)
-      
+
+# 定义全局变量
+# 判断游戏结束
+enemy_hp_sum = 0
+
 # 定义字典键名
-name = "name"   # 名字键名
-hp = "hp"       # 血量键名       
-mp = "mp"       # 魔法值键名
-eva = "eva"     # 闪避值键名
-attack = "attack"   # 攻击力键名
-skills = "skills"   # 技能键名
-exp = "exp"         # 当前的经验
-level = "level"     # 当前等级
+name = "name"  # 名字键名
+hp = "hp"  # 血量键名
+mp = "mp"  # 魔法值键名
+eva = "eva"  # 闪避值键名
+attack = "attack"  # 攻击力键名
+skills = "skills"  # 技能键名
+exp = "exp"  # 当前的经验
+level = "level"  # 当前等级
 
 # 创建主角
 my = {
@@ -53,6 +57,7 @@ my = {
     }
 }
 
+# TODO 防御力、跳过回合、群攻、道具
 
 # 测试主角
 # print('---测试主角--------------------------')
@@ -70,11 +75,11 @@ my = {
 
 # NPC列表
 enemys = [
-    {name: "东方不败",hp: 100,attack: 10, exp: 100},
-    {name: "岳不群",hp: 100,attack: 20, exp: 100},
-    {name: "林平之",hp: 200,attack: 30, exp: 200},
-    {name: "左冷禅",hp: 200,attack: 30, exp: 300},
-    {name: "任我行",hp: 500,attack: 30, exp: 500}
+    {name: "东方不败", hp: 100, attack: 10, exp: 100},
+    {name: "岳不群", hp: 100, attack: 20, exp: 100},
+    {name: "林平之", hp: 200, attack: 30, exp: 200},
+    {name: "左冷禅", hp: 200, attack: 30, exp: 300},
+    {name: "任我行", hp: 500, attack: 30, exp: 500}
 ]
 
 # 测试代码
@@ -96,7 +101,7 @@ while True:
     my[hp] += 10
     if my[hp] > __MAX_HP__:
         my[hp] = __MAX_HP__
-    
+
     # 回复魔法值
     my[mp] += 5
     if my[mp] > __MAX_MP__:
@@ -105,7 +110,7 @@ while True:
     ### 每回合初始化操作 ###
 
     # 展示主角基本信息
-    print("\n{0:-^30}".format(my[name]+'信息'))
+    print("\n{0:-^30}".format(my[name] + '信息'))
     print("生命：{0}, 魔法：{1} \n经验值：{2}".format(my[hp], my[mp], my[exp]))
     print("-" * __WIDTH__)
 
@@ -120,39 +125,42 @@ while True:
     print("-" * __WIDTH__)
 
     # 选择要攻击的敌人编号
-    enemy_num = 0 # 储存选择的敌人编号
+    # 储存选择的敌人编号
     enemy_num = int(input('请选择敌人编号：')) % len(enemys)
-    
+
     # 展示技能
     all_skills = list(my[skills].keys())
     print("\n{:-^30}".format('选择技能'))
     for snum in range(len(all_skills)):
-        skill_key = all_skills[snum] # 技能字典的键
-        skill_attack = my[skills][skill_key][attack] #技能攻击力
-        skill_mp = my[skills][skill_key][mp] # 技能消耗的mp
+        # 技能字典的键
+        skill_key = all_skills[snum]
+        # 技能攻击力
+        skill_attack = my[skills][skill_key][attack]
+        # 技能消耗的mp
+        skill_mp = my[skills][skill_key][mp]
         print("%s.[%s] \n    攻击力 %s 消耗魔法 %s" % (snum, skill_key, skill_attack, skill_mp))
-    print('-'*__WIDTH__)
+    print('-' * __WIDTH__)
 
     # 选择技能编号
-    chice_snum = int(input("请选择技能：")) % len(all_skills)
-    chice_skill = my[skills][all_skills[chice_snum]]
+    choice_snum = int(input("请选择技能：")) % len(all_skills)
+    choice_skill = my[skills][all_skills[choice_snum]]
 
     # 判断主角剩余魔法值是否够本次技能施展
-    if my[mp] < chice_skill[mp]:
+    if my[mp] < choice_skill[mp]:
         print("\n{:*^30}".format(' 错误 '))
         print("魔法值不足！")
-        print('*'*__WIDTH__)
+        print('*' * __WIDTH__)
         continue
 
     # 用选择好的技能攻击选中的敌人
-    attack_enemy = enemys[enemy_num] #被选择敌人的字典信息
-    skill_attack = chice_skill[attack]
+    attack_enemy = enemys[enemy_num]  # 被选择敌人的字典信息
+    skill_attack = choice_skill[attack]
 
     # 敌人减血
     attack_enemy[hp] -= skill_attack
 
     # 技能消耗MP值
-    my[mp] -= chice_skill[mp]
+    my[mp] -= choice_skill[mp]
 
     # 当前目标死亡标识
     if attack_enemy[hp] <= 0:
@@ -182,7 +190,6 @@ while True:
         # 攻击旁白
         print("\n「你攻击了 {0}, -{1} 生命!」\n".format(attack_enemy[name], skill_attack))
 
-
     # 敌人回击(逐个回击)
     for enemy in enemys:
         # 如果敌人死亡则不攻击
@@ -199,17 +206,15 @@ while True:
             template = "\n「{0} 攻击了 {1}, -{2} 生命 {3}」"
             print(template.format(enemy[name], my[name], enemy[attack], my[hp]))
 
-    # 判断游戏结束
-    enemy_hp_sum = 0
     # 获取敌人hp总和
     for enemy in enemys:
         enemy_hp_sum += enemy[attack]
-    
+
     if my[hp] <= 0 or enemy_hp_sum <= 0:
-        break;
+        break
 
 # 判断游戏胜利或者失败
-if my[hp] > 0 and enemy_hp_sum <= 0:
+if my[hp] > 0 >= enemy_hp_sum:
     print("主角胜利")
 else:
     print("敌人胜利")
