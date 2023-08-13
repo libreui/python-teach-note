@@ -353,3 +353,76 @@ C. age:15 school:电子城中学
 D. school:电子城中学
 
 
+----------------- 10.4.0 ——————————————
+
+执行以下代码，输入数字99， 运行结果是ok。()
+a=input('输入一个数字：')
+if a<100:
+    print('ok)
+
+关于一下代码，描述正确的是：()
+a = 'False'
+if a:
+    print('True')
+
+A. 上述代码的输出结果为True
+B. 上述代码的输出结果为False
+C. 上述代码存在语法错误
+D. 上述代码没有语法错误，但是没有任何输出
+
+下面代码运行后输入23，其结果为：()
+a = int(input('请输入数字：'))
+if a > 23:
+    if a-7 == 23:
+        print('情况一')
+    else:
+        print('情况二')
+else:
+    if a+7 == 30:
+        print("情况三")
+    else:
+        print("情况四")
+
+A. 情况一 B. 情况二 C. 情况三 D. 情况四
+
+character = ["诚实", "感恩", "坚持", "守时"], 运行一下代码，结果是：()
+
+if not("怜悯" in character):
+    character.append("怜悯")
+print(character[1] + character[-1])
+
+A.诚实守时 B.诚实怜悯 C.感恩守时 D.感恩怜悯
+
+----------------- 13.5.0 ——————————————
+
+ls = [['金京', 89], ['张三', 90], ['李四', 88]]
+
+for row in range(len(ls)):
+    for column in range(len(ls[row])):
+        print(________, end="\t)
+print()
+
+A. ls[row][column]
+B. ls[row]
+C. ls[column]
+D. ls[column][row]
+
+请读取1班和2班语文学科成绩文件 score.csv 的数据，数据内容如下：
+班级|语文成绩
+1|90
+2|56
+1|87
+2|78
+1|89
+
+import csv
+with open("__________") as f:
+    rows = list(csv.reader(f))
+    sum1 = 0
+    sum2 = 0
+    for row in rows[1:]:
+        if int(__________) == 1:
+            sum1 += int(row[1])
+        else:
+            sum2 += int(row[1])
+    print(_________)

@@ -40,6 +40,8 @@ attack = "attack"  # 攻击力键名
 skills = "skills"  # 技能键名
 exp = "exp"  # 当前的经验
 level = "level"  # 当前等级
+defence = "def" # 防御力
+aoe = "AOE" # 群体攻击
 
 # 创建主角
 my = {
@@ -47,17 +49,18 @@ my = {
     hp: __MAX_HP__,
     eva: 50,
     mp: __MAX_MP__,
+    defence: 5,
     exp: 0,
     level: 1,
     skills: {
-        "普通攻击": {'attack': 10, 'mp': 0},
-        "华山剑法": {'attack': 200, 'mp': 10},
-        "独孤九剑": {'attack': 20, 'mp': 20},
-        "葵花宝典": {'attack': 30, 'mp': 30}
+        "普通攻击": {attack: 10, mp: 0, aoe: False},
+        "华山剑法": {attack: 200, mp: 10, aoe: False},
+        "独孤九剑": {attack: 20, mp: 20, aoe: False},
+        "葵花宝典": {attack: 30, mp: 30, aoe: True}
     }
 }
 
-# TODO 防御力、跳过回合、群攻、道具
+# TODO 群攻、道具、技能附带异常状态
 
 # 测试主角
 # print('---测试主角--------------------------')
@@ -114,6 +117,11 @@ while True:
     print("生命：{0}, 魔法：{1} \n经验值：{2}".format(my[hp], my[mp], my[exp]))
     print("-" * __WIDTH__)
 
+    # 询问是否跳过回合
+    is_next = input("是否跳过本回合(y/n)：")
+    if is_next == 'y':
+        continue
+
     # 展示敌人信息
     print("\n{:-^30}".format('敌人信息'))
     for i in range(len(enemys)):
@@ -138,7 +146,9 @@ while True:
         skill_attack = my[skills][skill_key][attack]
         # 技能消耗的mp
         skill_mp = my[skills][skill_key][mp]
-        print("%s.[%s] \n    攻击力 %s 消耗魔法 %s" % (snum, skill_key, skill_attack, skill_mp))
+        # 群攻属性
+        skill_aoe = my[skills][skill_key][aoe]
+        print("%s.[%s] \n    攻击力 %s 消耗魔法 %s AOE %s" % (snum, skill_key, skill_attack, skill_mp, skill_aoe))
     print('-' * __WIDTH__)
 
     # 选择技能编号
@@ -156,8 +166,15 @@ while True:
     attack_enemy = enemys[enemy_num]  # 被选择敌人的字典信息
     skill_attack = choice_skill[attack]
 
-    # 敌人减血
-    attack_enemy[hp] -= skill_attack
+    # 判断是否是群体攻击，而后做出相应逻辑处理
+    if choice_skill[aoe]:
+        # 遍历每一个敌人，并减血
+        for e in enemys:
+            if e[hp] >= 0:
+                e[hp] -= skill_attack
+    else:
+        # 单体攻击 敌人减血
+        attack_enemy[hp] -= skill_attack
 
     # 技能消耗MP值
     my[mp] -= choice_skill[mp]
@@ -199,12 +216,13 @@ while True:
         if random.randint(1, 100) < my[eva]:
             print("\n「躲过了 {0} 的攻击」".format(enemy[name]))
         else:
-            # 殴打主角
-            my[hp] -= enemy[attack]
+            # 殴打主角 增加有防御力效果
+            minus_hp = enemy[attack] - my[defence]
+            my[hp] -= minus_hp
 
             # 旁白
             template = "\n「{0} 攻击了 {1}, -{2} 生命 {3}」"
-            print(template.format(enemy[name], my[name], enemy[attack], my[hp]))
+            print(template.format(enemy[name], my[name], minus_hp, my[hp]))
 
     # 获取敌人hp总和
     for enemy in enemys:
