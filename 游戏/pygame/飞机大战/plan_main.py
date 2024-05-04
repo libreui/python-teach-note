@@ -1,32 +1,52 @@
-from play_module import *
+import pygame
+from game_sprites import *
 
-# 初始化游戏
-pygame.init()
 
-# 设置窗口大小
-screen_size = (480, 700)
-screen = pygame.display.set_mode(screen_size)
+class PlanGame(object):
+    def __init__(self):
+        print("游戏初始化...")
+        pygame.init()
+        self.screen = pygame.display.set_mode(SCREEN_RECT.size)
+        self.clock = pygame.time.Clock()
+        self.__create_sprites()
+        pygame.time.set_timer(CREATE_ENEMY_EVENT, 1000)
+        pygame.time.set_timer(HERO_FIRE_EVENT, 500)
 
-# 背景
-bg_img = pygame.image.load("images/background.png")
-screen.blit(bg_img, (0, 0))
 
-pygame.display.set_caption("飞机大战")
+    def __create_sprites(self):
+        bg1 = Background()
+        bg2 = Background(True)
+        self.backgrounds = pygame.sprite.Group(bg1, bg2)
 
-# 初始化玩家飞机
-player = Player(0, 0)
+    def __update_sprites(self):
+        self.backgrounds.update()
+        self.backgrounds.draw(self.screen)
 
-# 游戏运行
-running = True
-while running:
-    screen.fill((0, 0, 0))
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
 
-    # 渲染玩儿家
-    player.draw(screen)
+    def __event_handler(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                PlanGame.__game_over()
 
-    pygame.display.update()
 
-pygame.quit()
+    def start(self):
+        print("游戏开始...")
+        while True:
+            self.clock.tick(FRAME_PER_SEC)
+            self.__event_handler()
+            self.__update_sprites()
+            pygame.display.update()
+
+
+    @staticmethod
+    def __game_over():
+        print("游戏结束...")
+        pygame.quit()
+        exit()
+
+
+if __name__ == '__main__':
+    game = PlanGame()
+    game.start()
+
+
