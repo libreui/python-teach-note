@@ -18,15 +18,43 @@ class PlanGame(object):
         bg2 = Background(True)
         self.backgrounds = pygame.sprite.Group(bg1, bg2)
 
+        # 敌机精灵
+        self.enemy_group = pygame.sprite.Group()
+
+        # 英雄精灵
+        self.hero = Hero()
+        self.hero_group = pygame.sprite.Group(self.hero)
+
+
     def __update_sprites(self):
         self.backgrounds.update()
         self.backgrounds.draw(self.screen)
+
+        # 敌机组更新
+        self.enemy_group.update()
+        self.enemy_group.draw(self.screen)
+
+        # 飞机组更新
+        self.hero_group.update()
+        self.hero_group.draw(self.screen)
 
 
     def __event_handler(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 PlanGame.__game_over()
+            elif event.type == CREATE_ENEMY_EVENT:
+                print("敌人出场")
+                enemy = Enemy()
+                self.enemy_group.add(enemy)
+
+        keys_pressed = pygame.key.get_pressed()
+        if keys_pressed[pygame.K_RIGHT]:
+            self.hero.speed = 3
+        elif keys_pressed[pygame.K_LEFT]:
+            self.hero.speed = -3
+        else:
+            self.hero.speed = 0
 
 
     def start(self):
