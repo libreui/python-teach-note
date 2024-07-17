@@ -15,6 +15,9 @@ value.set("0")
 def callback(arg):
     """按钮点击"""
     value.set(str(arg))
+    # TODO 记录点击的按钮数字还是符号，入栈
+    # 如果是数字累计，直到按下了一个符号
+    # 如果是等号，就计算结果
 
 
 def clear():
