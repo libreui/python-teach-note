@@ -7,6 +7,7 @@ from bullet import Bullet
 from alien import Alien
 from game_stats import GameStats
 from button import Button
+from scoreboard import Scoreboard
 
 
 class AlienInvasion:
@@ -28,6 +29,9 @@ class AlienInvasion:
 
         # 初始化游戏统计信息
         self.stats = GameStats(self)
+
+        # 创建记分牌
+        self.sb = Scoreboard(self)
 
         # 创建一艘飞船实例
         self.ship = Ship(self)
@@ -57,6 +61,7 @@ class AlienInvasion:
         """响应飞船被外星人撞到"""
         if self.stats.ships_left > 0:
             self.stats.ships_left -= 1
+            self.sb.prep_ship()
 
             # 清空剩余的外星人和子弹
             self.aliens.empty()
@@ -110,6 +115,7 @@ class AlienInvasion:
             bullet.draw_bullet()
 
         self.aliens.draw(self.screen)
+        self.sb.show_score()
 
         if not self.stats.game_active:
             self.play_button.draw_button()
@@ -145,6 +151,9 @@ class AlienInvasion:
             # 重置游戏统计信息
             self.stats.reset_stats()
             self.stats.game_active = True
+            self.sb.prep_score()
+            self.sb.prep_level()
+            self.sb.prep_ship()
 
             # 清空外星人和子弹
             self.aliens.empty()
@@ -161,11 +170,20 @@ class AlienInvasion:
         """响应子弹和外星人的碰撞"""
         # 删除发生碰撞的子弹和外星人
         collections = pygame.sprite.groupcollide(self.bullets, self.aliens, True, True)
+        if collections:
+            for aliens in collections.values():
+                self.stats.score += self.settings.alien_points * len(aliens)
+                self.sb.prep_score()
+                self.sb.check_high_score()
 
         if not self.aliens:
             self.aliens.empty()
             self._create_fleet()
             self.settings.increase_speed()
+
+            # 提高等级
+            self.stats.level += 1
+            self.sb.prep_level()
 
     def _check_aliens_bottom(self):
         """检查是否有外星人到达了屏幕低端"""
@@ -179,6 +197,7 @@ class AlienInvasion:
         """响应按键和鼠标事件"""
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                # 退出游戏
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
                 self._check_keydown_events(event)
