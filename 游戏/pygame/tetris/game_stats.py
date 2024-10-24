@@ -5,6 +5,7 @@ class GameStats:
         """初始化统计信息"""
         self.score = 0
         self.level = 1
+        self.counter = 0
 
         self.game_active = False
         self.cube_active = False

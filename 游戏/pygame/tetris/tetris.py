@@ -1,6 +1,6 @@
 import sys
 import pygame
-import os
+from pprint import pprint
 
 from settings import Settings
 from game_stats import GameStats
@@ -25,6 +25,7 @@ class Tetris:
         while True:
             self.clock.tick(self.fps)
             self.__check_event()
+            self.__pin_cube()
             self.__update_screen()
 
             # TODO左右移动积木
@@ -62,10 +63,43 @@ class Tetris:
                     break
                 if event.key == pygame.K_SPACE:
                     self.cube.rotate()
+                elif event.key == pygame.K_LEFT:
+                    self.cube.left()
+                elif event.key == pygame.K_RIGHT:
+                    self.cube.right()
+                elif event.key == pygame.K_DOWN:
+                    while self.cube.down():
+                        pass
+
+    def __pin_cube(self):
+        if self.stats.cube_active and self.stats.counter % self.settings.fps == 0:
+            if not self.cube.down():
+                for cube in self.cube.get_all_gridpos():
+                    self.settings.screen_color_matrix[cube[0]][cube[1]] = self.cube.color
+                self.cube = CubeShape(self)
+                # 判断是否已经到屏幕顶端，需要清楚屏幕方块
+                if self.cube.conflict(self.cube.center):
+                    self.stats.cube_active = False
+                    self.cube = None
+                    self.settings.screen_color_matrix = [[None] * self.settings.grid_num_width for _ in range(self.settings.grid_num_height)]
+        self.stats.counter += 1
+
+    def __draw_matrix(self):
+        """绘制堆积方块"""
+        for i, row in zip(range(self.settings.grid_num_height), self.settings.screen_color_matrix):
+            for j, color in zip(range(self.settings.grid_num_width), row):
+                if color is not None:
+                    pygame.draw.rect(self.screen, color,
+                                     (j * self.settings.grid_width, i * self.settings.grid_width,
+                                      self.settings.grid_width, self.settings.grid_width))
+                    pygame.draw.rect(self.screen, self.settings.white,
+                                     (j * self.settings.grid_width, i * self.settings.grid_width,
+                                      self.settings.grid_width, self.settings.grid_width), 1)
 
     def __update_screen(self):
         self.screen.fill(self.settings.black)
         self.__draw_grids()
+        self.__draw_matrix()
         if self.cube is not None:
             self.cube.draw()
         pygame.display.update()
