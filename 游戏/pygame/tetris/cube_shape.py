@@ -7,11 +7,26 @@ class CubeShape:
     SHAPES = ['I', 'J', 'L', 'O', 'S', 'T', 'Z']
     I = [[(0, -1), (0, 0), (0, 1), (0, 2)],
          [(-1, 0), (0, 0), (1, 0), (2, 0)]]
+    J = [[(-2, 0), (-1, 0), (0, 0), (0, -1)],
+         [(-1, 0), (0, 0), (0, 1), (0, 2)],
+         [(0, 1), (0, 0), (1, 0), (2, 0)],
+         [(0, -2), (0, -1), (0, 0), (1, 0)]]
+    L = [[(-2, 0), (-1, 0), (0, 0), (0, 1)],
+         [(1, 0), (0, 0), (0, 1), (0, 2)],
+         [(0, -1), (0, 0), (1, 0), (2, 0)],
+         [(0, -2), (0, -1), (0, 0), (-1, 0)]]
+    O = [[(0, 0), (0, 1), (1, 0), (1, 1)]]
+    S = [[(-1, 0), (0, 0), (0, 1), (1, 1)],
+         [(1, -1), (1, 0), (0, 0), (0, 1)]]
+    T = [[(0, -1), (0, 0), (0, 1), (-1, 0)],
+         [(-1, 0), (0, 0), (1, 0), (0, 1)],
+         [(0, -1), (0, 0), (0, 1), (1, 0)],
+         [(-1, 0), (0, 0), (1, 0), (0, -1)]]
+    Z = [[(0, -1), (0, 0), (1, 0), (1, 1)],
+         [(-1, 0), (0, 0), (0, -1), (1, -1)]]
     SHAPES_WITH_DIR = {
-        'I': I
+        'I': I, 'J': J, 'L': L, 'O': O, 'S': S, 'T': T, 'Z': Z
     }
-
-    # TODO 添加其他形状
 
     def __init__(self, tetris):
         """创建方块"""
@@ -19,9 +34,9 @@ class CubeShape:
         self.settings = tetris.settings
         self.stats = tetris.stats
 
-        # self.shape = self.SHAPES[random.randint(0, len(self.SHAPES) - 1)]
-        self.shape = self.SHAPES[0]
-        self.center = (1, self.settings.grid_num_width // 2)
+        self.shape = self.SHAPES[random.randint(0, len(self.SHAPES) - 1)]
+        # self.shape = self.SHAPES[0]
+        self.center = (2, self.settings.grid_num_width // 2)
         self.dir = random.randint(0, len(self.SHAPES_WITH_DIR[self.shape]) - 1)
         self.color = self.settings.cube_color[random.randint(0, len(self.settings.cube_color) - 1)]
 

@@ -8,4 +8,9 @@ class GameStats:
         self.counter = 0
 
         self.game_active = False
-        self.cube_active = False
+        self.gameover = True
+
+    def clear_score(self):
+        self.score = 0
+        self.level = 1
+        self.counter = 0
