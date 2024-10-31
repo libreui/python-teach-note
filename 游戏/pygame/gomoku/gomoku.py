@@ -1,6 +1,5 @@
 import pygame
 import sys
-from pprint import pprint
 from settings import Settings
 from board import Board
 from game_stats import GameStats
@@ -19,10 +18,9 @@ class Gomoku:
         pygame.display.set_caption(self.settings.title)
 
         self.clock = pygame.time.Clock()
-
         self.stats = GameStats(self)
-        self.bg = pygame.image.load(self.settings.bg_img)
         self.board = Board(self)
+        self.bg = pygame.image.load(self.settings.bg_img)
 
     def start(self):
         """游戏开始"""
@@ -37,7 +35,11 @@ class Gomoku:
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 self.__check_click(event)
             elif event.type == pygame.KEYDOWN:
-                self.stats.game_active = True
+                if event.key == pygame.K_ESCAPE and self.stats.win > -1:
+                    self.stats.reset_stats()
+                    self.board.reset()
+                # 这里原本是按任意键开始游戏
+                # self.stats.game_active = True
 
     def __update_screen(self):
         """更新屏幕"""
@@ -48,6 +50,9 @@ class Gomoku:
             self.board.draw()
         else:
             self.__draw_button()
+
+        self.__show_win_text()
+
         pygame.display.flip()
 
     def __draw_grid(self):
@@ -109,6 +114,8 @@ class Gomoku:
             self.stats.game_active = True
 
     def __set_chess(self, event):
+        if self.stats.win >= 0:
+            return
         self.stats.change_player()
         x, y = event.pos
         col = round((x - self.settings.board_side) / self.settings.cell_size)
@@ -117,12 +124,41 @@ class Gomoku:
         # 落子
         self.board.make_move(row, col, self.stats.current_play)
 
+        # 检查输赢
+        self.stats.check_win_all(self.board.board)
+
     def __check_click(self, event):
         """打印鼠标位置, 并绘制棋子"""
         if not self.stats.game_active:
             self.__button_click(event)
         else:
             self.__set_chess(event)
+
+    def __show_win_text(self):
+        """显示输赢信息"""
+        if self.stats.win < 0:
+            return
+        win_txt = ''
+        if self.stats.win == 0:
+            win_txt = '黑棋胜利'
+        elif self.stats.win == 1:
+            win_txt = '白棋胜利'
+        elif self.stats.win == 2:
+            win_txt = '平局'
+        font = pygame.font.Font(self.settings.font, 36)
+        font_image = font.render(win_txt, True, (0, 0, 0))
+        font_rect = font_image.get_rect()
+        font_rect.midtop = self.screen_rect.midtop
+        self.screen.blit(font_image, font_rect)
+
+        self.__show_esc_text()
+
+    def __show_esc_text(self):
+        font = pygame.font.Font(self.settings.font, 12)
+        font_image = font.render('按ESC键重新开始', True, (0, 0, 0))
+        font_rect = font_image.get_rect()
+        font_rect.midtop = (self.screen_rect.midtop[0], self.screen_rect.midtop[1] + 40)
+        self.screen.blit(font_image, font_rect)
 
 
 if __name__ == '__main__':

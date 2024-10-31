@@ -8,6 +8,9 @@ class Board:
         self.stats = gomoku.stats
         self.board = [[''] * self.settings.board_size for _ in range(self.settings.board_size)]
 
+    def reset(self):
+        self.board = [[''] * self.settings.board_size for _ in range(self.settings.board_size)]
+
     def make_move(self, row, col, play):
         if self.board[row][col] == "":
             self.board[row][col] = play
@@ -24,8 +27,6 @@ class Board:
                 elif self.board[row][col] == self.settings.white_player:
                     self.__draw_white(row, col)
 
-        self.__check_win()
-
     def __draw_black(self, row, col):
         pygame.draw.circle(self.screen, self.settings.black,
                            (col * self.settings.cell_size + self.settings.board_side,
@@ -35,9 +36,5 @@ class Board:
         pygame.draw.circle(self.screen, self.settings.white,
                            (col * self.settings.cell_size + self.settings.board_side,
                             row * self.settings.cell_size + self.settings.board_side), self.settings.chess_size)
-
-    def __check_win(self):
-        # TODO: 判定胜利
-        pass
 
 

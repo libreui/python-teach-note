@@ -1,6 +1,8 @@
 class Settings:
     def __init__(self):
 
+        self.font = './static/djzt.otf'
+
         self.title = '五子棋 by Libre'
         self.icon_img = './static/gomoku_icon.png'
         self.button_img_ai = './static/ai.png'
