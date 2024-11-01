@@ -10,6 +10,8 @@ class Game:
         self.__version = conf.__GAME_VERSION__
         # 当前选择的敌人编号
         self.__selected_enemy_num = 0
+        # 当前选中的敌人对象
+        self.__selected_enemy = None
         self.master = master
         self.enemies = enemies
 
@@ -23,22 +25,30 @@ class Game:
             # 展示敌人信息
             self.__show_enemies()
 
-            n = input("选择敌人编号：")
-            self.__selected_enemy_num = int(n)
-            print(f"编号:{self.__selected_enemy_num}")
+            n = int(input("选择敌人编号："))
+            self.__selected_enemy_num = n
 
             # 选择玩家技能
             self.master.show_skills()
             n = int(input("选择攻击技能："))
             self.master.set_selected_skill(n)
-            # 测试
-            print(self.master.selected_skill.name)
 
-            # TODO 攻击敌人
+            # 攻击敌人, 并处理减血
+            self.master.selected_skill.attack(
+                self.__selected_enemy_num, self.enemies)
+
+            # 敌人攻击回合
+            self.__enemys_round()
+
 
             if n == 'q':
                 break
 
+
+    def __enemys_round(self):
+        """敌人回合"""
+        for enemy in self.enemies:
+            enemy.attack(self.master)
 
     def __header(self):
         print('=' * conf.__WIDTH__)
@@ -59,7 +69,7 @@ class Game:
         print(f'----------- 敌人信息 -----------')
         for i in range(len(self.enemies)):
             enemy = self.enemies[i]
-            print(f'{i}.{enemy.name}: 生命:{enemy.hp}, 攻击力:{enemy.attack}')
+            print(f'{i}.{enemy.name}: 生命:{enemy.hp}, 攻击力:{enemy.ack}')
         print('-' * conf.__WIDTH__)
 
 

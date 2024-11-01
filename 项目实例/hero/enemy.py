@@ -1,14 +1,28 @@
 class Enemy:
-    def __init__(self, name, hp, attack, exp):
+    def __init__(self, name, hp, ack, exp):
         self.name = name
         self.hp = hp
-        self.attack = attack
+        self.ack = ack
         self.exp = exp
 
     def __str__(self):
-        return f'{self.name}, {self.hp}, {self.attack}, {self.exp}'
+        return f'{self.name}, {self.hp}, {self.ack}, {self.exp}'
+
+    def bleed(self, n):
+        """出血"""
+        self.hp -= n
+        self.hp = 0 if self.hp < 0 else self.hp
+
+    def attack(self, player):
+        """攻击玩家"""
+        player.bleed(self.ack)
 
 
 if __name__ == '__main__':
-    enemy = Enemy('小兵', 100, 10, 10)
+    enemy = Enemy('小兵', 100, 1000, 1000)
     print(enemy)
+    from master import Master
+    player = Master('aa', 100, 100, [])
+    player.description()
+    enemy.attack(player)
+    player.description()
