@@ -15,9 +15,14 @@ class Game:
         self.master = master
         self.enemies = enemies
 
+        # 游戏是否结束
+        self.game_over = False
+        # 胜利者
+        self.winner = 0
+
     def start(self):
         self.__header()
-        while True:
+        while not self.game_over:
 
             # 主角登场
             self.master.description()
@@ -37,12 +42,39 @@ class Game:
             self.master.selected_skill.attack(
                 self.__selected_enemy_num, self.enemies)
 
+
             # 敌人攻击回合
             self.__enemys_round()
 
+            # 判断胜利条件
+            self.__check_game_over()
 
             if n == 'q':
                 break
+
+        self.__show_winner()
+
+    def __show_winner(self):
+        """显示胜利者"""
+        if self.winner == 1:
+            print("玩家胜利")
+        elif self.winner == 2:
+            print("敌人胜利")
+
+    def __check_game_over(self):
+        """游戏是否结束"""
+        if self.master.is_died():
+            self.winner = 2
+            self.game_over = True
+
+        enemies_died = []
+        for enemy in self.enemies:
+            enemies_died.append(enemy.is_died())
+
+        # 判断玩家胜利
+        if all(enemies_died):
+            self.winner = 1
+            self.game_over = True
 
 
     def __enemys_round(self):
@@ -79,11 +111,13 @@ class Game:
 
 
 if __name__ == '__main__':
+    # TODO: 消耗MP、闪避、经验、升级、暴击等
+
     # 创建技能
     skills = [
         Skill('普通攻击', 10, 10, False),
         Skill('乾坤一掷', 20, 20, False),
-        Skill('降龙十八掌', 30, 30, True),
+        Skill('降龙十八掌', 30, 55, True),
     ]
     # 创建主角
     player = Master(conf.__PLAYER_NAME__, conf.__PLAYER_HP__, conf.__PLAYER_MP__, skills)

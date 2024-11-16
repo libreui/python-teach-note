@@ -9,12 +9,12 @@ class Master:
         self.skills = skills
         self.selected_skill = None
 
-        self.__setToSkill()
+        self.__set_to_skill_player()
 
-    def __setToSkill(self):
+    def __set_to_skill_player(self):
         """给技能装载玩家信息"""
         for skill in self.skills:
-            skill.setPlayer(self)
+            skill.set_player(self)
 
     def description(self):
         print(f'-------- {self.name} --------')
@@ -40,6 +40,10 @@ class Master:
         """出血"""
         self.hp -= n
         self.hp = 0 if self.hp < 0 else self.hp
+
+    def is_died(self):
+        """主角是否死亡"""
+        return True if self.hp <= 0 else False
 
     def __str__(self):
         return self.name
