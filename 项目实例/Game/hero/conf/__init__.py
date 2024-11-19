@@ -5,4 +5,4 @@ __WIDTH__ = 30
 # 玩家的基本设置
 __PLAYER_NAME__ = "张无忌"
 __PLAYER_HP__ = 1000
-__PLAYER_MP__ = 9
+__PLAYER_MP__ = 100
