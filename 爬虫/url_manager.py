@@ -32,7 +32,6 @@ class UrlManager(object):
 
         return None
 
-
     def has_new_url(self):
         """判断集合中是否有新的URL"""
         return len(self.new_urls) > 0
@@ -40,7 +39,7 @@ class UrlManager(object):
 
 if __name__ == '__main__':
     # 测试代码
-    url_manager = Url_Manager()
+    url_manager = UrlManager()
     url_manager.add_new_url('http://www.baidu.com')
     print(url_manager.new_urls, url_manager.old_urls)
     url_manager.add_new_url('http://www.sina.com')
@@ -54,7 +53,3 @@ if __name__ == '__main__':
     print(url_manager.new_urls, url_manager.old_urls)
     print(url_manager.get_url())
     print(url_manager.new_urls, url_manager.old_urls)
-
-
-
-
