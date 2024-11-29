@@ -143,7 +143,7 @@ def add_student():
 
 menubar = tk.Menu(window)
 
-# 创建一个名字是"file"的下拉菜单，其中包括"打开"、"保存"和"退出"三个子菜单, 退出前面要有分割线，每个项目有快捷键
+# 创建一个名字是"res"的下拉菜单，其中包括"打开"、"保存"和"退出"三个子菜单, 退出前面要有分割线，每个项目有快捷键
 fileMenu = tk.Menu(menubar, tearoff=False)
 fileMenu.add_command(label="新建...", command=lambda: new_file())
 fileMenu.add_command(label="打开...", command=lambda: open_file())
@@ -152,7 +152,7 @@ fileMenu.add_command(label="另存为...", command=lambda: save_as())
 fileMenu.add_separator()
 fileMenu.add_command(label="退出", command=window.quit)
 
-# 将"file"和"edit"菜单添加到"menubar"菜单中
+# 将"res"和"edit"菜单添加到"menubar"菜单中
 menubar.add_cascade(label="文件", menu=fileMenu)
 
 # 显示菜单
