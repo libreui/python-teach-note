@@ -51,5 +51,19 @@ while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_q:
+                sys.exit()
+            elif event.key == pygame.K_LEFT:
+                print('向左移动')
+            elif event.key == pygame.K_RIGHT:
+                print('向右移动')
+            elif event.key == pygame.K_UP:
+                print('向上移动')
+            elif event.key == pygame.K_DOWN:
+                print('向下移动')
 
-    pygame.display.update()
+    font_img_1.get_rect().y += 10
+    pygame.display.flip()
+
+    # pygame.display.update()

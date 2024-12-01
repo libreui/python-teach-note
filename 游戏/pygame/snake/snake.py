@@ -9,8 +9,10 @@ SCREEN = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
 pygame.display.set_caption("贪吃蛇")
 
-SCORE_FONT = pygame.font.SysFont("SimSun", 25)
-RESULT_FONT = pygame.font.SysFont("SimSun", 25)
+# SCORE_FONT = pygame.font.SysFont("SimSong", 25)
+SCORE_FONT = pygame.font.Font('./djzt.otf', 25)
+# RESULT_FONT = pygame.font.SysFont("SimSong", 25)
+RESULT_FONT = pygame.font.Font('./djzt.otf', 25)
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
