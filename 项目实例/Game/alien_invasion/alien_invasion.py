@@ -37,15 +37,27 @@ class AlienInvasion:
             # 更新飞船
             self.ship.update()
             # 更新子弹编组
-            self.bullets.update()
+            self._update_bullets()
 
             # 更新屏幕
             self._update_screen()
 
+    def _update_bullets(self):
+        """更新子弹编组"""
+        self.bullets.update()
+
+        # 删除子弹
+        for bullet in self.bullets.copy():
+            if bullet.rect.bottom < 0:
+                self.bullets.remove(bullet)
+
     def _fire_bullet(self):
         """开火"""
-        new_bullet = Bullet(self)
-        self.bullets.add(new_bullet)
+        # 只允许3发
+        if len(self.bullets) < self.settings.bullets_allowed:
+            new_bullet = Bullet(self)
+            self.bullets.add(new_bullet)
+
 
     def _check_events(self):
         """处理每次循环中的事件"""
