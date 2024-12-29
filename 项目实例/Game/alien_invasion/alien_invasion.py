@@ -1,9 +1,10 @@
 import pygame
-
+import sys
 from pygame.sprite import Group
 from settings import Settings
 from ship import Ship
 from bullet import Bullet
+from alien import Alien
 
 
 class AlienInvasion:
@@ -25,6 +26,10 @@ class AlienInvasion:
         # 创建子弹的编组
         self.bullets = Group()
 
+        # 创建一个敌人编组
+        self.aliens = Group()
+        self._create_fleet()
+
         # 定义背景色
         self.bg_color = self.settings.bg_color
 
@@ -33,14 +38,16 @@ class AlienInvasion:
         while True:
             # 监视键盘鼠标等事件
             self._check_events()
-
             # 更新飞船
             self.ship.update()
             # 更新子弹编组
             self._update_bullets()
 
+            self.aliens.update()
+
             # 更新屏幕
             self._update_screen()
+
 
     def _update_bullets(self):
         """更新子弹编组"""
@@ -64,7 +71,7 @@ class AlienInvasion:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-                exit()
+                sys.exit()
             elif event.type == pygame.KEYDOWN: # 判断键盘按下事件
                 self._check_keydown_events(event)
             elif event.type == pygame.KEYUP: # 判断键盘抬起事件
@@ -103,11 +110,42 @@ class AlienInvasion:
         for bullet in self.bullets.sprites():
             bullet.draw_bullet()
 
+        # 绘制敌人
+        self.aliens.draw(self.screen)
+
         # 更新屏幕
         pygame.display.flip()
+
+    def _create_fleet(self):
+        """创建并添加敌人"""
+        alien = Alien(self)
+
+        alien_width, alien_height = alien.rect.size
+        available_space_x = self.settings.screen_width - (2 * alien_width)
+        number_aliens_x = available_space_x // (2 * alien_width)
+
+        # 计算可以放置外星人的高度
+        ship_height = self.ship.rect.height
+        available_space_y = (self.settings.screen_height -
+                             (3 * alien_height) - ship_height)
+        number_rows = available_space_y // (2 * alien_height)
+
+        # 绘制一行外星人
+        for row_number in range(number_rows):
+            for alien_number in range(number_aliens_x):
+                self._create_alien(alien_number, row_number)
+
+
+    def _create_alien(self, alien_number, row_number):
+        alien = Alien(self)
+        alien_width, alien_height = alien.rect.size
+        alien.x = alien_width + 2 * alien_number * alien_width
+        alien.rect.x = alien.x
+        alien.rect.y = alien_height + 2 * row_number * alien_height
+        self.aliens.add(alien)
+
 
 
 if __name__ == "__main__":
     ai = AlienInvasion()
     ai.run_game()
-    pygame.quit()
