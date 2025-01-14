@@ -110,6 +110,8 @@ class AlienInvasion:
         for bullet in self.bullets.sprites():
             bullet.draw_bullet()
 
+        # 检测外星人碰撞边缘
+        self._check_fleet_edges()
         # 绘制敌人
         self.aliens.draw(self.screen)
 
@@ -143,6 +145,24 @@ class AlienInvasion:
         alien.rect.x = alien.x
         alien.rect.y = alien_height + 2 * row_number * alien_height
         self.aliens.add(alien)
+
+    def _check_fleet_edges(self):
+        """有没有外星人碰到边缘"""
+        for alien in self.aliens.sprites():
+            if alien.check_edges():
+                # 所有外星人改变方向
+                self._change_fleet_direction()
+                break
+    
+    def _change_fleet_direction(self):
+        # 首先要改变左右方向
+        self.settings.fleet_direction *= -1
+        # 下降
+        for alien in self.aliens.sprites():
+            # alien.rect.y += self.settings.fleet_drop_speed
+            alien.down()
+
+    
 
 
 
