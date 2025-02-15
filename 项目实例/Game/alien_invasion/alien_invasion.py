@@ -5,6 +5,7 @@ from settings import Settings
 from ship import Ship
 from bullet import Bullet
 from alien import Alien
+from game_stats import GameStats
 
 
 class AlienInvasion:
@@ -16,9 +17,13 @@ class AlienInvasion:
         # 初始化设置类
         self.settings = Settings()
 
+
         self.screen = pygame.display.set_mode(
             (self.settings.screen_width, self.settings.screen_height))
         pygame.display.set_caption("Alien Invasion")
+
+        # 保存游戏状态以及统计信息
+        self.stats = GameStats(self)
 
         # 创建飞船
         self.ship = Ship(self)
@@ -43,10 +48,17 @@ class AlienInvasion:
             # 更新子弹编组
             self._update_bullets()
 
-            self.aliens.update()
+            self._update_aliens()
 
             # 更新屏幕
             self._update_screen()
+
+    def _update_aliens(self):
+        """更新外星人"""
+        self.aliens.update()
+
+        if pygame.sprite.spritecollideany(self.ship, self.aliens):
+            print("飞船被攻击了！！！！")
 
 
     def _update_bullets(self):
@@ -57,6 +69,19 @@ class AlienInvasion:
         for bullet in self.bullets.copy():
             if bullet.rect.bottom < 0:
                 self.bullets.remove(bullet)
+
+        self._check_bullet_alien_collisions()
+
+    def _check_bullet_alien_collisions(self):
+        """检测外星人与子弹碰撞"""
+        # 碰撞检测，是否碰撞到了敌人
+        collisions = pygame.sprite.groupcollide(self.bullets, self.aliens,
+                                                False, True)
+        if not self.aliens:
+            # 删除所有子弹
+            self.bullets.empty()
+            # 创建新的外星人
+            self._create_fleet()
 
     def _fire_bullet(self):
         """开火"""
