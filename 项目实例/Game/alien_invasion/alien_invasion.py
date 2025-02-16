@@ -58,7 +58,38 @@ class AlienInvasion:
         self.aliens.update()
 
         if pygame.sprite.spritecollideany(self.ship, self.aliens):
-            print("飞船被攻击了！！！！")
+            self._ship_hit()
+
+        self._check_aliens_bottom()
+
+    def _check_aliens_bottom(self):
+        """检查外星人是否触底"""
+        screen_rect = self.screen.get_rect()
+        for alien in self.aliens.sprites():
+            if alien.rect.bottom > screen_rect.bottom:
+                self._ship_hit()
+                break
+
+    def _ship_hit(self):
+        """
+        飞船被攻击以后得方法
+        1. 重新创建一批外星人
+        2. 让飞船数量-1
+        3. 飞船位置居中
+        """
+        # 飞船数量减1
+        self.stats.ship_left -= 1
+
+        # 清空外星人和子弹
+        self.bullets.empty()
+        self.aliens.empty()
+
+        # 重新创建一批外星人
+        self._create_fleet()
+
+        # 让飞船回到正中间
+        self.ship.center_ship()
+
 
 
     def _update_bullets(self):

@@ -19,6 +19,7 @@ class Ship:
 
         # 设置飞船的初始位置
         self.rect.midbottom = self.screen_rect.midbottom
+        self.x = self.rect.x
 
         # 定义连续右移动的开关
         self.move_right = False
@@ -36,3 +37,8 @@ class Ship:
     def blitme(self):
         """绑定飞船到屏幕上"""
         self.screen.blit(self.image, self.rect)
+
+    def center_ship(self):
+        """让飞船居中"""
+        self.rect.midbottom = self.screen_rect.midbottom
+        self.x = self.rect.x
