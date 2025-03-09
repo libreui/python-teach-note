@@ -6,6 +6,7 @@ from ship import Ship
 from bullet import Bullet
 from alien import Alien
 from game_stats import GameStats
+from button import Button
 
 
 class AlienInvasion:
@@ -35,6 +36,9 @@ class AlienInvasion:
         self.aliens = Group()
         self._create_fleet()
 
+        # 创建按钮
+        self.play_button = Button(self, "Play")
+
         # 定义背景色
         self.bg_color = self.settings.bg_color
 
@@ -43,12 +47,14 @@ class AlienInvasion:
         while True:
             # 监视键盘鼠标等事件
             self._check_events()
-            # 更新飞船
-            self.ship.update()
-            # 更新子弹编组
-            self._update_bullets()
 
-            self._update_aliens()
+            if self.stats.game_active:
+                # 更新飞船
+                self.ship.update()
+                # 更新子弹编组
+                self._update_bullets()
+
+                self._update_aliens()
 
             # 更新屏幕
             self._update_screen()
@@ -77,8 +83,13 @@ class AlienInvasion:
         2. 让飞船数量-1
         3. 飞船位置居中
         """
-        # 飞船数量减1
-        self.stats.ship_left -= 1
+        if self.stats.ship_left > 0:
+            # 飞船数量减1
+            self.stats.ship_left -= 1
+        else:
+            self.stats.game_active = False
+            pygame.mouse.set_visible(True)
+
 
         # 清空外星人和子弹
         self.bullets.empty()
@@ -132,6 +143,28 @@ class AlienInvasion:
                 self._check_keydown_events(event)
             elif event.type == pygame.KEYUP: # 判断键盘抬起事件
                 self._check_keyup_events(event)
+            elif event.type == pygame.MOUSEBUTTONDOWN: # 鼠标按下事件
+                mouse_pos = pygame.mouse.get_pos()
+                self._check_play_button(mouse_pos)
+
+    def _start_game(self):
+        # self.stats.game_active = True
+        pygame.mouse.set_visible(False)
+        self.stats.reset_stats()
+
+        # 清空外星人和子弹
+        self.aliens.empty()
+        self.bullets.empty()
+
+        # 创建新的外星人和飞船
+        self._create_fleet()
+        self.ship.center_ship()
+
+    def _check_play_button(self, mouse_pos):
+        """判断按钮点击是否成功"""
+        clicked = self.play_button.rect.collidepoint(mouse_pos)
+        if clicked and not self.stats.game_active:
+            self._start_game()
 
     def _check_keydown_events(self, event):
         """处理键盘落下事件"""
@@ -144,6 +177,9 @@ class AlienInvasion:
             self.ship.move_left = True
         elif event.key == pygame.K_SPACE:
             self._fire_bullet()  # 发射
+        elif event.key == pygame.K_p:
+            # 游戏开始
+            self._start_game()
 
     def _check_keyup_events(self, event):
         """处理键盘抬起事件"""
@@ -171,8 +207,13 @@ class AlienInvasion:
         # 绘制敌人
         self.aliens.draw(self.screen)
 
+        # 绘制按钮
+        if not self.stats.game_active:
+            self.play_button.draw_button()
+
         # 更新屏幕
         pygame.display.flip()
+
 
     def _create_fleet(self):
         """创建并添加敌人"""
