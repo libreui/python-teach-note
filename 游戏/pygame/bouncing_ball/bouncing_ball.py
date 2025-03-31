@@ -27,9 +27,9 @@ class Ball(Sprite):
     def update(self):
         self.x += self.speed * self.direction[0]
         self.y += self.speed * self.direction[1]
-        if self.x + self.radius >= self.screen_rect.right:
-            self.direction = [0, 0]
-        if self.x - self.radius <= self.screen_rect.left:
+
+        if (self.x + self.radius >= self.screen_rect.right
+                or self.x - self.radius <= self.screen_rect.left):
             self.direction = [0, 0]
         if self.y + self.radius >= self.screen_rect.bottom:
             self.direction[1] = -1
@@ -148,6 +148,8 @@ class Game:
             pygame.display.update()
             # 计算球拍的加速度
             self.paddle_acceleration = (self.paddle_left.rect.centery - current_y) / 10
+            self.paddle_acceleration = round(self.paddle_acceleration-int(self.paddle_acceleration), 1)
+            print(self.paddle_acceleration)
             self.clock.tick(30)
 
     def _update_screen(self):
@@ -199,10 +201,10 @@ class Game:
             # 小球碰到左边的球拍，改变方向
             if self.ball.x - self.ball.radius <= self.paddle_left.x + self.paddle_left.width:
                 # 小球的方向改变，但是改变的方向是根据球拍的加速度来改变的
-                self.ball.direction[0] = 1
+                self.ball.direction[0] = 1 - self.paddle_acceleration
             # 小球碰到右边的球拍，改变方向
             if self.ball.x + self.ball.radius >= self.paddle_right.x:
-                self.ball.direction[0] = -1
+                self.ball.direction[0] = -1 + self.paddle_acceleration
 
 
 
