@@ -9,7 +9,7 @@ import csv
 current_csv_path = ''
 
 window = tk.Tk()
-window.title('学生信息管理系统')
+window.title('studentsystem')
 
 WIDTH = 600
 HEIGHT = 400
