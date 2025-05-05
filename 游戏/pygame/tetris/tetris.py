@@ -107,11 +107,12 @@ class Tetris:
         new_matrix = [[None] * self.settings.grid_num_width for _ in range(self.settings.grid_num_height)]
         index = self.settings.grid_num_height - 1
         for i in range(self.settings.grid_num_height - 1, -1, -1):
-            is_full = True
-            for j in range(self.settings.grid_num_width):
-                if self.settings.screen_color_matrix[i][j] is None:
-                    is_full = False
-                    continue
+            # is_full = True
+            is_full = all(self.settings.screen_color_matrix[i])
+            # for j in range(self.settings.grid_num_width):
+            #     if self.settings.screen_color_matrix[i][j] is None:
+            #         is_full = False
+            #         continue
             if not is_full:
                 new_matrix[index] = self.settings.screen_color_matrix[i]
                 index -= 1

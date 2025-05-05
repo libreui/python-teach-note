@@ -35,19 +35,35 @@ class Tetris:
                 self.cube = None
                 self.cube = CubeShape(self)
 
-
+            self.__remove_full_line()
         self.stats.counter += 1
 
     def __draw_matrix(self):
         """绘制矩阵"""
-        for i, row in zip(range(0, self.settings.grid_num_height), self.settings.screen_color_matrix):
-            for j, color in zip(range(0, self.settings.grid_num_width), row):
+        # i 行数, j 列数
+        for i, row in enumerate(self.settings.screen_color_matrix):
+            for j, color in enumerate(row):
                 if color is not None:
                     pygame.draw.rect(self.screen, color, (j * self.settings.grid_width,
                                                           i * self.settings.grid_width,
                                                           self.settings.grid_width,
                                                           self.settings.grid_width))
 
+
+    def __remove_full_line(self):
+        """消除满行"""
+        # 创建一个新的矩阵
+        new_matrix = [[None] * self.settings.grid_num_width for _ in range(self.settings.grid_num_height)]
+        index = self.settings.grid_num_height - 1
+        for i in range(self.settings.grid_num_height - 1, -1, -1):
+            is_full = all(self.settings.screen_color_matrix[i])
+            if not is_full:
+                new_matrix[index] = self.settings.screen_color_matrix[i]
+                index -= 1
+            else:
+                # 满行，积分+1
+                self.stats.score += 1
+        self.settings.screen_color_matrix = new_matrix
 
 
     def __event_handler(self):
