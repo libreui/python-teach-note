@@ -56,7 +56,7 @@ enemies = [
 ]
 
 # 保存玩家是否胜利
-winner = False
+player_win = False
 
 
 # 游戏逻辑
@@ -76,14 +76,31 @@ def showCaption():
     """)
 
 
+def show_player_info():
+    """显示玩家信息"""
+    print(player[name])
+    print(f"生命: {player[hp]}/{player[maxHp]}, "
+          f"内力: {player[mp]}/{player[maxMp]}")
+    print(f"经验值:{player[exp]}")
+    pass
+
+
 def player_turn():
     """玩家回合"""
-    pass
+    print(f"{'玩家回合':-^37}")
+    # 显示玩家信息
+    show_player_info()
+    print(f"-" * __WIDTH__)
 
 
 def enemies_turn():
     """敌人回合"""
     pass
+
+
+def check_winner():
+    """玩家是否胜利"""
+    return player_win
 
 
 def main():
@@ -93,7 +110,22 @@ def main():
 
     while True:     # 游戏的主循环
         player_turn()   # 玩家回合
+
+        # 问，是否要过回合或者退出游戏
+        # y: 跳过 n: 不跳过 q: 退出
+        command = input("是否跳过回合(y/[n]/q):")
+        if command == 'y':
+            continue
+        elif command == 'q':
+            break
+
         enemies_turn()  # 敌人回合
+
+        # 判断游戏结果
+        if check_winner():
+            break
+
+        # 测试用
         break
 
 
