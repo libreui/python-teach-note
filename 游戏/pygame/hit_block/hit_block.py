@@ -197,18 +197,12 @@ class DarkBlock(Block):
 
 
 
-class GreenBlock(Sprite):
+class GreenBlock(Block):
     def __init__(self, game, x=0, y=0):
-        super().__init__()
+        super().__init__(game, x, y)
         self.count = random.randint(1, 3)
-        self.screen = game.screen
-        self.screen_rect = game.screen.get_rect()
         self.color = (255, 165, 0)
-        self.x = x
-        self.y = y
-        self.rect = pygame.Rect(self.x, self.y,
-                                game.get_block_width(),
-                                game.get_block_height())
+
 
     def draw_text(self):
         font = pygame.font.Font("unifont.otf", 12)
@@ -217,7 +211,7 @@ class GreenBlock(Sprite):
         self.screen.blit(text, (x, self.rect.y))
 
     def draw(self):
-        pygame.draw.rect(self.screen, self.color, self.rect)
+        super().draw()
         self.draw_text()
 
     def update(self):
@@ -436,7 +430,7 @@ class Game:
                 for block in collided_block:
                     if block.killed_enable:
                         self.blocks.remove(block)
-                        # 如果碰到了砖块的侧壁，那么改变方向
+                        # 如果碰到了砖块的侧壁，那么改变方向[0, 0]
                         ball.direction[1] = -ball.direction[1]
                         self.cur_point += 1
                         # 添加彩色砖块
