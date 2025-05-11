@@ -103,6 +103,38 @@ def check_winner():
     return player_win
 
 
+def show_enemies_info():
+    print(f"{'敌人信息':-^37}")
+    for i, enemy in enumerate(enemies):
+        print(f"{i}.[{enemy[name]}]")
+        print(f"\t生命:{enemy[hp]}, 攻击力:{enemy[attack]}")
+    print(f"-" * __WIDTH__)
+
+
+def get_enemy_id() -> int:
+    eid = input("选择敌人编号:")
+
+    while True:
+        if not eid.isdigit():
+            print("输入错误，请输入整数！")
+            eid = input("选择敌人编号:")
+        elif abs(int(eid)) > len(enemies):
+            print("没有此敌人！")
+            eid = input("选择敌人编号:")
+        else:
+            break
+
+    return abs(int(eid))
+
+
+def show_skills_info():
+    print(f"{'选择技能':-^37}")
+    for i, skill in enumerate(player[skills].items()):
+        print(f"{i}.[{skill[0]}]")
+        print(f"\t攻击力:{skill[1][attack]}, 消耗内力:{skill[1][mp]}, AOE:{skill[1][aoe]}")
+    print(f"-" * __WIDTH__)
+
+
 def main():
     """程序的主入口"""
     # 显示标题
@@ -118,6 +150,14 @@ def main():
             continue
         elif command == 'q':
             break
+
+        # 显示敌人信息
+        show_enemies_info()
+
+        # 选择敌人编号
+        enemy_id = get_enemy_id()
+        # 展示技能信息
+        show_skills_info()
 
         enemies_turn()  # 敌人回合
 
