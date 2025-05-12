@@ -56,7 +56,7 @@ enemies = [
 ]
 
 # 保存玩家是否胜利
-winner = False
+player_win = False
 
 
 # 游戏逻辑
@@ -76,14 +76,63 @@ def showCaption():
     """)
 
 
+def show_player_info():
+    """显示玩家信息"""
+    print(player[name])
+    print(f"生命: {player[hp]}/{player[maxHp]}, "
+          f"内力: {player[mp]}/{player[maxMp]}")
+    print(f"经验值:{player[exp]}")
+    pass
+
+
 def player_turn():
     """玩家回合"""
-    pass
+    print(f"{'玩家回合':-^37}")
+    # 显示玩家信息
+    show_player_info()
+    print(f"-" * __WIDTH__)
 
 
 def enemies_turn():
     """敌人回合"""
     pass
+
+
+def check_winner():
+    """玩家是否胜利"""
+    return player_win
+
+
+def show_enemies_info():
+    print(f"{'敌人信息':-^37}")
+    for i, enemy in enumerate(enemies):
+        print(f"{i}.[{enemy[name]}]")
+        print(f"\t生命:{enemy[hp]}, 攻击力:{enemy[attack]}")
+    print(f"-" * __WIDTH__)
+
+
+def get_enemy_id() -> int:
+    eid = input("选择敌人编号:")
+
+    while True:
+        if not eid.isdigit():
+            print("输入错误，请输入整数！")
+            eid = input("选择敌人编号:")
+        elif abs(int(eid)) > len(enemies):
+            print("没有此敌人！")
+            eid = input("选择敌人编号:")
+        else:
+            break
+
+    return abs(int(eid))
+
+
+def show_skills_info():
+    print(f"{'选择技能':-^37}")
+    for i, skill in enumerate(player[skills].items()):
+        print(f"{i}.[{skill[0]}]")
+        print(f"\t攻击力:{skill[1][attack]}, 消耗内力:{skill[1][mp]}, AOE:{skill[1][aoe]}")
+    print(f"-" * __WIDTH__)
 
 
 def main():
@@ -93,7 +142,30 @@ def main():
 
     while True:     # 游戏的主循环
         player_turn()   # 玩家回合
+
+        # 问，是否要过回合或者退出游戏
+        # y: 跳过 n: 不跳过 q: 退出
+        command = input("是否跳过回合(y/[n]/q):")
+        if command == 'y':
+            continue
+        elif command == 'q':
+            break
+
+        # 显示敌人信息
+        show_enemies_info()
+
+        # 选择敌人编号
+        enemy_id = get_enemy_id()
+        # 展示技能信息
+        show_skills_info()
+
         enemies_turn()  # 敌人回合
+
+        # 判断游戏结果
+        if check_winner():
+            break
+
+        # 测试用
         break
 
 
