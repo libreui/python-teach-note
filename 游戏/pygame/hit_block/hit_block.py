@@ -205,6 +205,7 @@ class GreenBlock(Block):
 
 
     def draw_text(self):
+        # pygame.font.SysFont(None, 8)
         font = pygame.font.Font("unifont.otf", 12)
         text = font.render(f"{self.count}", True, (0, 0, 0), None)
         x = self.rect.x + (self.rect.width - text.get_width()) // 2
@@ -279,14 +280,16 @@ class Game:
             self.game_active = False
 
     def _add_green_block(self, block):
+        """添加彩色砖块"""
         if len(self.green_blocks) > 2:
             return
-        """添加彩色砖块"""
         if self.cur_point % 10 != 0:
             return
 
         green_block = GreenBlock(self, block.rect.x, block.rect.y)
         self.green_blocks.add(green_block)
+
+        print(len(self.green_blocks))
 
     def _fleet_blocks(self):
         """创建砖块"""
