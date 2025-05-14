@@ -10,7 +10,7 @@ class Settings:
         self.animate_speed = 0.2 # 动画速度
 
         # 坦克速度
-        self.tank_speed = 5
+        self.tank_speed = 2
 
         # 资源大小
         self.element_size = 24 # 元素大小
