@@ -1,4 +1,5 @@
 import pygame
+from pygame import Rect
 from pygame.sprite import Sprite
 
 
@@ -20,5 +21,23 @@ class Brick(Sprite):
         super().__init__()
         self.image = surface
         self.rect = self.image.get_rect()
-        self.rect.topleft = pos
+        self.rect.left, self.rect.top = pos
 
+
+class Iron(Sprite):
+    def __init__(self, pos, surface):
+        super().__init__()
+        self.image = surface
+        self.rect = self.image.get_rect()
+        self.rect.left, self.rect.top = pos
+
+
+class ICE(Sprite):
+    def __init__(self, pos, surface):
+        super().__init__()
+        self.image = pygame.Surface((24, 24))
+        self.rect = self.image.get_rect()
+        for i in range(2):
+            for j in range(2):
+                self.image.blit(surface, (i * 12, j * 12))
+        self.rect.left, self.rect.top = pos
