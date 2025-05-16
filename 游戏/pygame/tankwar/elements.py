@@ -2,6 +2,9 @@ import pygame
 from pygame import Rect
 from pygame.sprite import Sprite
 
+# 坦克位置
+tank_pos = [0, 0]
+
 
 class Elements:
     def __init__(self):
@@ -17,6 +20,14 @@ class Elements:
 
 
 class Brick(Sprite):
+    def __init__(self, pos, surface):
+        super().__init__()
+        self.image = surface
+        self.rect = self.image.get_rect()
+        self.rect.topleft = pos
+
+
+class Iron(Sprite):
     def __init__(self, pos, surface):
         super().__init__()
         self.image = surface

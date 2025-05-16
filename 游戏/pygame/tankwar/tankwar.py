@@ -1,4 +1,6 @@
 import pygame
+from pygame.sprite import Group
+
 from settings import Settings
 from tank import Tank
 from resources import Resources
@@ -19,16 +21,17 @@ class TankWar:
         # 加载背景图片
         self.bg_image = self.res.bg
 
-        # 实例化一个坦克(Test)
-        self.tank = Tank(self)
-
         # 初始化一个地图
         self.elements = Map(self).load_map("level_0.lvl")
+
+        # 实例化一个坦克(Test)
+        self.tank = Tank(self, self.elements)
 
 
     def ran(self):
         while True:
             self._check_events()
+            self._check_tank_events()
             self._update_screen()
             self.clock.tick(self.settings.fps)
 
@@ -38,24 +41,21 @@ class TankWar:
                 pygame.quit()
                 exit()
             elif event.type == pygame.KEYDOWN:
-                self._check_tank_events(event)
-            elif event.type == pygame.KEYUP:
-                self.tank.dx = 0
-                self.tank.dy = 0
+                if event.key == pygame.K_SPACE:
+                    self.tank.fire()
 
-    def _check_tank_events(self, event):
-        if event.key == pygame.K_UP:
-            self.tank.dy -= self.settings.tank_speed
-            self.tank.direction = 'up'
-        if event.key == pygame.K_DOWN:
-            self.tank.dy += self.settings.tank_speed
-            self.tank.direction = 'down'
-        if event.key == pygame.K_LEFT:
-            self.tank.dx -= self.settings.tank_speed
-            self.tank.direction = 'left'
-        if event.key == pygame.K_RIGHT:
-            self.tank.dx += self.settings.tank_speed
-            self.tank.direction = 'right'
+    def _check_tank_events(self):
+        key_pressed = pygame.key.get_pressed()
+        if key_pressed[pygame.K_UP]:
+            self.tank.move('up')
+        elif key_pressed[pygame.K_DOWN]:
+            self.tank.move('down')
+        elif key_pressed[pygame.K_LEFT]:
+            self.tank.move('left')
+        elif key_pressed[pygame.K_RIGHT]:
+            self.tank.move('right')
+
+
 
     def _update_screen(self):
         self.screen.fill(self.settings.bg_color)
@@ -64,7 +64,8 @@ class TankWar:
         self._update_map_elements()
 
         self.tank.blitme()
-        self.tank.update()
+        self.tank.bullets.update()
+        self.tank.bullets.draw(self.screen)
 
         pygame.display.flip()
 

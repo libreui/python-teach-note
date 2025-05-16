@@ -1,13 +1,12 @@
-import time
-
-import pygame
 from pygame import Rect
-
-import resources as res
+from pygame.sprite import Group
+from bullet import Bullet
 
 
 class Tank:
-    def __init__(self, tw, x=0, y=0):
+    def __init__(self, tw, elements, x=0, y=0):
+        self.tw = tw
+        self.elements = elements
         self.clock = tw.clock
         self.screen = tw.screen
         self.settings = tw.settings
@@ -20,7 +19,7 @@ class Tank:
         self.timer = 0
         self.timer_max = self.settings.fps
 
-        self.rect = Rect(x, y, 48, 48)
+        self.rect = Rect(elements.tank_pos, (48, 48))
         self.up = [
             self.image.subsurface((0, 0, 48, 48)),
             self.image.subsurface((48, 0, 48, 48))
@@ -39,14 +38,39 @@ class Tank:
         ]
 
         self.direction = 'up'
-        self.dx = 0
-        self.dy = 0
 
-    def update(self):
-        """移动坦克"""
-        self.rect.x += self.dx
-        self.rect.y += self.dy
+        self.bullets = Group()
 
+    def move(self, direction):
+        speed = 0
+        self.direction = direction
+        if direction == 'up':
+            speed = (0, -self.settings.tank_speed)
+        elif direction == 'down':
+            speed = (0, self.settings.tank_speed)
+        elif direction == 'left':
+            speed = (-self.settings.tank_speed, 0)
+        elif direction == 'right':
+            speed = (self.settings.tank_speed, 0)
+
+        self.rect = self.rect.move(speed)
+        self._check_collied_screen()
+
+    def fire(self):
+        self._remove_bullet()
+        new_bullet = Bullet(self.tw, self)
+        self.bullets.add(new_bullet)
+        print(len(self.bullets))
+
+    def _remove_bullet(self):
+        for bullet in self.bullets.copy():
+            if (bullet.rect.bottom <= 0
+                    or bullet.rect.top >= self.screen_rect.height
+                    or bullet.rect.right <= 0
+                    or bullet.rect.left >= self.screen_rect.width):
+                self.bullets.remove(bullet)
+
+    def _check_collied_screen(self):
         if self.rect.x <= 0:
             self.rect.x = 0
         if self.rect.x >= self.screen_rect.width - self.settings.tank_size:
@@ -55,7 +79,6 @@ class Tank:
             self.rect.y = 0
         if self.rect.y >= self.screen_rect.height - self.settings.tank_size:
             self.rect.y = self.screen_rect.height - self.settings.tank_size
-
 
     def blitme(self):
         self.timer += self.settings.animate_speed

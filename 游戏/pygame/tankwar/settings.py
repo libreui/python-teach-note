@@ -11,6 +11,8 @@ class Settings:
 
         # 坦克速度
         self.tank_speed = 2
+        # 子弹速度
+        self.bullet_speed = 4
 
         # 资源大小
         self.element_size = 24 # 元素大小
