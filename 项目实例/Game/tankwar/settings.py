@@ -12,6 +12,7 @@ class Settings:
 
         # 坦克速度
         self.tank_speed = 1
+        self.enemy_tank_speed = 1
         # 子弹速度
         self.bullet_speed = 2
 

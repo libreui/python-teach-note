@@ -6,6 +6,7 @@ from tank import Tank
 from resources import Resources
 from map import Map
 from bullet import Bullet
+from enemy_tank import EnemyTank
 
 
 class TankWar:
@@ -25,10 +26,13 @@ class TankWar:
         self.elements = Map(self).load_map("level_0.lvl")
 
         # 实例化一个坦克(Test)
-        self.tank = Tank(self)
+        self.tank = Tank(self, self.elements)
 
         # 实例化子弹编组
         self.bullets = Group()
+
+        # 创建一个坦克编组
+        self.enemy_tanks = Group()
 
     def run(self):
         while True:
@@ -49,6 +53,15 @@ class TankWar:
         """发射子弹"""
         new_bullet = Bullet(self, self.tank)
         self.bullets.add(new_bullet)
+
+    def _refresh_enemy_tanks(self):
+        """刷新敌人坦克"""
+        if len(self.enemy_tanks) > 0:
+            return
+        # 生产
+        for pos in self.elements.enemy_tank_pos:
+            enemy_tank = EnemyTank(self, self.elements, pos)
+            self.enemy_tanks.add(enemy_tank)
 
     def _update_bullets(self):
         # 如果超出屏幕移除子弹
@@ -81,6 +94,10 @@ class TankWar:
         self._check_tank_events()
 
         self._update_bullets()
+        self._refresh_enemy_tanks()
+
+        self.enemy_tanks.update()
+        self.enemy_tanks.draw(self.screen)
 
         pygame.display.flip()
 

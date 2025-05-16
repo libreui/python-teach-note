@@ -8,7 +8,7 @@ import resources as res
 
 
 class Tank(Sprite):
-    def __init__(self, tw, x=0, y=0):
+    def __init__(self, tw, elements, x=0, y=0):
         super().__init__()
         self.clock = tw.clock
         self.screen = tw.screen
@@ -23,7 +23,7 @@ class Tank(Sprite):
         self.timer = 0
         self.timer_max = self.settings.fps
 
-        self.rect = Rect(x, y, 48, 48)
+        self.rect = Rect(elements.tank_pos, (48, 48))
         self.up = [
             self.image.subsurface((0, 0, 48, 48)),
             self.image.subsurface((48, 0, 48, 48))
