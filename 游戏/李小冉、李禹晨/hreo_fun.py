@@ -1,5 +1,3 @@
-import random
-
 __GAME_NAME__ = "笑傲江湖"
 # 游戏版本
 __VERSION__ = "1.0.0"
@@ -13,6 +11,8 @@ __MAX_HP__ = 2000
 __MAX_MP__ = 100
 # 经验值列表
 __EXP_LIST__ = [100, 200, 300]
+
+import sys
 
 # 键名
 name = "name"
@@ -38,12 +38,12 @@ player = {
     dex: 30,
     exp: 0,  # 经验值
     level: 1,  # 等级
-    skills: {
-        "普通攻击": {attack: 300, mp: 0, aoe: False},
-        "华山剑法": {attack: 200, mp: 10, aoe: False},
-        "独孤九剑": {attack: 20, mp: 20, aoe: False},
-        "葵花宝典": {attack: 3000, mp: 30, aoe: True}
-    }
+    skills: [
+        {name: "普通攻击", attack: 300, mp: 0, aoe: False},
+        {name: "华山剑法", attack: 200, mp: 10, aoe: False},
+        {name: "独孤九剑", attack: 20, mp: 20, aoe: False},
+        {name: "葵花宝典", attack: 3000, mp: 30, aoe: True}
+    ]
 }
 
 # 创建敌人
@@ -127,12 +127,35 @@ def get_enemy_id() -> int:
     return abs(int(eid))
 
 
+def get_skill_id():
+    skill_id = input("选择技能编号:")
+    while True:
+        if not skill_id.isdigit():
+            print("输入错误，请输入整数！")
+            skill_id = input("选择技能编号:")
+            continue
+        elif int(skill_id) > len(player['skills']):
+            print("没有此技能！")
+            skill_id = input("选择技能编号:")
+        else:
+            break
+    return int(skill_id)
+
+
 def show_skills_info():
     print(f"{'选择技能':-^37}")
-    for i, skill in enumerate(player[skills].items()):
-        print(f"{i}.[{skill[0]}]")
-        print(f"\t攻击力:{skill[1][attack]}, 消耗内力:{skill[1][mp]}, AOE:{skill[1][aoe]}")
+    for i, skill in enumerate(player[skills]):
+        print(f"{i}.[{skill[name]}]")
+        print(f"\t攻击力:{skill[attack]}, 消耗内力:{skill[mp]}, AOE:{skill[aoe]}")
     print(f"-" * __WIDTH__)
+
+
+def attack_enemy(enemy_id, skill_id):
+    """攻击敌人"""
+    enemy = enemies[enemy_id]
+    skill = player[skills][skill_id]
+    enemy[hp] -= skill[attack]
+    print(f"[你攻击了 '{enemy[name]}', -{skill[attack]}生命！]")
 
 
 def main():
@@ -140,8 +163,8 @@ def main():
     # 显示标题
     showCaption()
 
-    while True:     # 游戏的主循环
-        player_turn()   # 玩家回合
+    while True:  # 游戏的主循环
+        player_turn()  # 玩家回合
 
         # 问，是否要过回合或者退出游戏
         # y: 跳过 n: 不跳过 q: 退出
@@ -158,8 +181,17 @@ def main():
         enemy_id = get_enemy_id()
         # 展示技能信息
         show_skills_info()
+        # 选择技能编号
+        skill_id = get_skill_id()
+
+        # 攻击敌人
+        attack_enemy(enemy_id, skill_id)
+
+        # TODO 回击
 
         enemies_turn()  # 敌人回合
+
+        print(enemies)
 
         # 判断游戏结果
         if check_winner():
