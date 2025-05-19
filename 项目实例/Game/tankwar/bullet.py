@@ -4,16 +4,17 @@ from pygame.sprite import Sprite
 
 
 class Bullet(Sprite):
-    def __init__(self, tw, tank):
+    def __init__(self, tw, direction, pos=(0, 0), owner=None):
         super().__init__()
-        self.clock = tw.clock
+        self.tw = tw
         self.screen = tw.screen
         self.settings = tw.settings
         self.res = tw.res
         self.rect = Rect(0, 0, 12, 12)
-        self.rect.center = tank.rect.center
-        self.direction = tank.direction
+        self.rect.center = pos
+        self.direction = direction
         self.image = self.get_image()
+        self.owner = owner
 
     def get_image(self):
         image = self.res.bullet_up
@@ -34,6 +35,7 @@ class Bullet(Sprite):
             self.rect.x -= self.settings.bullet_speed
         elif self.direction == 'right':
             self.rect.x += self.settings.bullet_speed
+
 
 
 

@@ -14,7 +14,7 @@ class Settings:
         self.tank_speed = 1
         self.enemy_tank_speed = 1
         # 子弹速度
-        self.bullet_speed = 2
+        self.bullet_speed = 5
 
         # 资源大小
         self.element_size = 24  # 元素大小

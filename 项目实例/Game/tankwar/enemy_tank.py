@@ -2,6 +2,7 @@ import random
 
 import pygame
 from pygame.sprite import Sprite
+from bullet import Bullet
 
 
 class EnemyTank(Sprite):
@@ -9,6 +10,8 @@ class EnemyTank(Sprite):
         super().__init__()
 
         self.frame = 0
+
+        self.bullets = tw.bullets
 
         self.elements = elements
         self.settings = tw.settings
@@ -20,13 +23,20 @@ class EnemyTank(Sprite):
         # 等级
         self.level = random.randint(0, 3)
         self.health = len(self.res.enemy_tank[self.level])
-        self.tank_image = self.res.enemy_tank[self.level][0]
+        self.tank_image = self.res.enemy_tank[self.level][self.health - 1]
         self._set_direction_image(self.direction)
         self.rect = self.image.get_rect()
         print(pos)
         self.rect.topleft = pos
 
+        # 子弹冷却时间
+        self.bullet_cooling = False
+        self.bullet_cooling_time = 120
+        self.bullet_cooling_count = 0
+
+
     def _set_direction_image(self, direction):
+        self.tank_image = self.res.enemy_tank[self.level][self.health - 1]
         if direction == 'up':
             self.image = self.tank_image.subsurface((0, 0), (96, 48))
         elif direction == 'down':
@@ -64,6 +74,16 @@ class EnemyTank(Sprite):
             self.direction = self._get_direction()
             self._set_direction_image(self.direction)
 
+
+        # 子弹冷
+        if self.bullet_cooling:
+            self.bullet_cooling_count += 1
+            if self.bullet_cooling_count >= self.bullet_cooling_time:
+                self.bullet_cooling = False
+                self.bullet_cooling_count = 0
+
+        self._shoot()
+
     def _collide_elements(self):
         """检测碰撞"""
         is_collide = False
@@ -89,3 +109,15 @@ class EnemyTank(Sprite):
             self.rect.bottom = self.screen_rect.bottom
             self.direction = random.choice(['up', 'left', 'right'])
         self._set_direction_image(self.direction)
+
+    def _shoot(self):
+        if self.bullet_cooling:
+            return
+        self.bullet_cooling = True
+        new_bullet = Bullet(self, self.direction, self.rect.center, self)
+        self.bullets.add(new_bullet)
+
+    def hit(self):
+        self.health -= 1
+        if self.health <= 0:
+            self.kill()

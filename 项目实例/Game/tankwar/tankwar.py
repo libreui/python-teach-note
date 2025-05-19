@@ -7,6 +7,7 @@ from resources import Resources
 from map import Map
 from bullet import Bullet
 from enemy_tank import EnemyTank
+from elements import *
 
 
 class TankWar:
@@ -25,14 +26,23 @@ class TankWar:
         # 初始化一个地图
         self.elements = Map(self).load_map("level_0.lvl")
 
-        # 实例化一个坦克(Test)
-        self.tank = Tank(self, self.elements)
-
         # 实例化子弹编组
         self.bullets = Group()
 
+        # 实例化一个坦克(Test)
+        self.tank = Tank(self, self.elements)
+
         # 创建一个坦克编组
         self.enemy_tanks = Group()
+
+    def get_tank(self):
+        return self.tank
+
+    def get_enemy_tanks(self):
+        return self.enemy_tanks
+
+    def get_map_elements(self):
+        return self.elements.get_elements()
 
     def run(self):
         while True:
@@ -47,12 +57,7 @@ class TankWar:
                 exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-                    self._fire_bullet()
-
-    def _fire_bullet(self):
-        """发射子弹"""
-        new_bullet = Bullet(self, self.tank)
-        self.bullets.add(new_bullet)
+                    self.tank.shoot()
 
     def _refresh_enemy_tanks(self):
         """刷新敌人坦克"""
@@ -90,14 +95,21 @@ class TankWar:
         self.screen.blit(self.bg_image, (0, 0))
 
         self._update_map_elements()
+
+        # 坦克
+        self.tank.update()
         self.tank.blitme()
         self._check_tank_events()
 
-        self._update_bullets()
-        self._refresh_enemy_tanks()
 
+        # 敌人坦克
+        self._refresh_enemy_tanks()
         self.enemy_tanks.update()
         self.enemy_tanks.draw(self.screen)
+
+        # 子弹
+        self._check_bullet_collied()
+        self._update_bullets()
 
         pygame.display.flip()
 
@@ -119,6 +131,23 @@ class TankWar:
                 # 重置移动速度，阻止坦克继续移动
                 self.tank.dx = 0
                 self.tank.dy = 0
+
+    def _check_bullet_collied(self):
+        # 首先是和地图元素碰撞
+        for ele, group in self.elements.get_elements().items():
+            collections = pygame.sprite.groupcollide(self.bullets, group, True, False)
+            if collections:
+                for bullet, elements in collections.items():
+                    if isinstance(elements[0], Iron):
+                        bullet.kill()
+                    elif isinstance(elements[0], Brick):
+                        elements[0].kill()
+            collections = pygame.sprite.groupcollide(self.bullets, self.enemy_tanks, False, False)
+            if collections:
+                for bullet, enemy_tanks in collections.items():
+                    if isinstance(bullet.owner, Tank) and isinstance(enemy_tanks[0], EnemyTank):
+                        bullet.kill()
+                        enemy_tanks[0].hit()
 
 
 if __name__ == "__main__":

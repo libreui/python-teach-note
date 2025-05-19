@@ -3,8 +3,7 @@ import time
 import pygame
 from pygame import Rect
 from pygame.sprite import Sprite
-
-import resources as res
+from bullet import Bullet
 
 
 class Tank(Sprite):
@@ -15,6 +14,12 @@ class Tank(Sprite):
         self.settings = tw.settings
         self.screen_rect = tw.screen.get_rect()
         self.res = tw.res
+        self.bullets = tw.bullets
+
+        # 子弹冷却时间
+        self.bullet_cooling = False
+        self.bullet_cooling_time = 30
+        self.bullet_cooling_count = 0
 
         # 加载坦克图像
         self.tank_image = self.res.tank_0
@@ -75,6 +80,14 @@ class Tank(Sprite):
         if self.rect.y >= self.screen_rect.height - self.settings.tank_size:
             self.rect.y = self.screen_rect.height - self.settings.tank_size
 
+    def update(self):
+        """子弹冷却"""
+        if self.bullet_cooling:
+            self.bullet_cooling_count += 1
+            if self.bullet_cooling_count >= self.bullet_cooling_time:
+                self.bullet_cooling = False
+                self.bullet_cooling_count = 0
+
     def blitme(self):
         self.timer += self.settings.animate_speed
         if self.timer >= len(self.up):
@@ -87,3 +100,11 @@ class Tank(Sprite):
             self.screen.blit(self.left[int(self.timer)], self.rect)
         if self.direction == 'right':
             self.screen.blit(self.right[int(self.timer)], self.rect)
+
+    def shoot(self):
+        if self.bullet_cooling:
+            return
+        self.bullet_cooling = True
+        new_bullet = Bullet(self, self.direction, self.rect.center, self)
+        self.bullets.add(new_bullet)
+
