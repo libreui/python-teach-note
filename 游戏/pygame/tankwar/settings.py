@@ -10,7 +10,7 @@ class Settings:
         self.animate_speed = 0.2 # 动画速度
 
         # 坦克速度
-        self.tank_speed = 2
+        self.tank_speed = 1
         # 子弹速度
         self.bullet_speed = 4
 

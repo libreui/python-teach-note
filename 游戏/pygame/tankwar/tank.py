@@ -1,3 +1,4 @@
+import pygame
 from pygame import Rect
 from pygame.sprite import Group
 from bullet import Bullet
@@ -6,6 +7,7 @@ from bullet import Bullet
 class Tank:
     def __init__(self, tw, elements, x=0, y=0):
         self.tw = tw
+        self.map = tw.map
         self.elements = elements
         self.clock = tw.clock
         self.screen = tw.screen
@@ -19,7 +21,7 @@ class Tank:
         self.timer = 0
         self.timer_max = self.settings.fps
 
-        self.rect = Rect(elements.tank_pos, (48, 48))
+        self.rect = Rect(self.map.tank_pos, (48, 48))
         self.up = [
             self.image.subsurface((0, 0, 48, 48)),
             self.image.subsurface((48, 0, 48, 48))
@@ -53,8 +55,22 @@ class Tank:
         elif direction == 'right':
             speed = (self.settings.tank_speed, 0)
 
+
+        rect_ori = self.rect
         self.rect = self.rect.move(speed)
-        self._check_collied_screen()
+        if (self._check_collied_screen()
+                or self._check_collied_elements()):
+            self.rect = rect_ori
+
+
+    def _check_collied_elements(self):
+        is_collied = False
+        for ele, group in self.elements.get_elements().items():
+            collisions = pygame.sprite.spritecollide(self, group, False)
+            if collisions:
+                is_collied = True
+                break
+        return is_collied
 
     def fire(self):
         self._remove_bullet()
@@ -71,14 +87,20 @@ class Tank:
                 self.bullets.remove(bullet)
 
     def _check_collied_screen(self):
-        if self.rect.x <= 0:
+        is_collied = False
+        if self.rect.x < 0:
             self.rect.x = 0
-        if self.rect.x >= self.screen_rect.width - self.settings.tank_size:
+            is_collied = True
+        if self.rect.x > self.screen_rect.width - self.settings.tank_size:
             self.rect.x = self.screen_rect.width - self.settings.tank_size
-        if self.rect.y <= 0:
+            is_collied = True
+        if self.rect.y < 0:
             self.rect.y = 0
-        if self.rect.y >= self.screen_rect.height - self.settings.tank_size:
+            is_collied = True
+        if self.rect.y > self.screen_rect.height - self.settings.tank_size:
             self.rect.y = self.screen_rect.height - self.settings.tank_size
+            is_collied = True
+        return is_collied
 
     def blitme(self):
         self.timer += self.settings.animate_speed

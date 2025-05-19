@@ -5,6 +5,7 @@ from settings import Settings
 from tank import Tank
 from resources import Resources
 from map import Map
+from enemy_tank import EnemyTank
 
 
 class TankWar:
@@ -22,10 +23,15 @@ class TankWar:
         self.bg_image = self.res.bg
 
         # 初始化一个地图
-        self.elements = Map(self).load_map("level_0.lvl")
+        self.map = Map(self)
+        self.elements = self.map.load_map("level_0.lvl")
 
         # 实例化一个坦克(Test)
         self.tank = Tank(self, self.elements)
+
+        # 实例化一个敌人坦克编组
+        self.enemy_tanks = Group()
+        self.enemy_tanks.add(EnemyTank(self, self.elements))
 
 
     def ran(self):
@@ -66,6 +72,9 @@ class TankWar:
         self.tank.blitme()
         self.tank.bullets.update()
         self.tank.bullets.draw(self.screen)
+
+        self.enemy_tanks.update()
+        self.enemy_tanks.draw(self.screen)
 
         pygame.display.flip()
 
