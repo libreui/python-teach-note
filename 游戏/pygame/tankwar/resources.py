@@ -11,6 +11,8 @@ bullet_path = f"{root}/resources/images/bullet"
 home_path = f"{root}/resources/images/home"
 enemy_tank_path = f"{root}/resources/images/enemyTank"
 
+audio_path = f"{root}/resources/audios"
+
 
 class Resources:
     def __init__(self):
@@ -36,6 +38,9 @@ class Resources:
         self.bullet_down = pygame.image.load(f"{bullet_path}/bullet_down.png")
         self.bullet_right = pygame.image.load(f"{bullet_path}/bullet_right.png")
         self.bullet_left = pygame.image.load(f"{bullet_path}/bullet_left.png")
+
+        # 出生动画图片
+        self.appear = pygame.image.load(f"{others_path}/appear.png")
 
         # 敌人坦克
         self.enemy_tank = [
@@ -63,3 +68,6 @@ class Resources:
                 pygame.image.load(f"{enemy_tank_path}/enemy_4_3.png")
             ]
         ]
+
+
+        self.audio_start = f"{audio_path}/start.wav"

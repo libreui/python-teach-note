@@ -41,7 +41,12 @@ class Tank:
 
         self.direction = 'up'
 
-        self.bullets = Group()
+        self.bullets = tw.bullets
+
+        # 子弹冷却时间
+        self.bullet_cooling = False
+        self.bullet_cooling_time = 60
+        self.bullet_cooling_count = 0
 
     def move(self, direction):
         speed = 0
@@ -74,9 +79,11 @@ class Tank:
 
     def fire(self):
         self._remove_bullet()
-        new_bullet = Bullet(self.tw, self)
+        if self.bullet_cooling:
+            return
+        new_bullet = Bullet(self.tw, self.direction, self.rect.center, self)
         self.bullets.add(new_bullet)
-        print(len(self.bullets))
+        self.bullet_cooling = True
 
     def _remove_bullet(self):
         for bullet in self.bullets.copy():
@@ -101,6 +108,14 @@ class Tank:
             self.rect.y = self.screen_rect.height - self.settings.tank_size
             is_collied = True
         return is_collied
+
+    def update(self):
+        # 子弹冷
+        if self.bullet_cooling:
+            self.bullet_cooling_count += 1
+            if self.bullet_cooling_count >= self.bullet_cooling_time:
+                self.bullet_cooling = False
+                self.bullet_cooling_count = 0
 
     def blitme(self):
         self.timer += self.settings.animate_speed

@@ -52,7 +52,7 @@ class Map:
     def _parse_element(self, row, y):
         """解析元素"""
         for x, ele in enumerate(row.strip().split(" ")):
-            pos = (x * self.settings.element_size,
+            pos = (3+x * self.settings.element_size,
                    y * self.settings.element_size)
             # 当前的位置
             if ele == "S":
