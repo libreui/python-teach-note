@@ -185,15 +185,8 @@ class ProgressBar:
 class DarkBlock(Block):
     def __init__(self, game, x=0, y=0):
         super().__init__(game, x, y)
-        self.screen = game.screen
-        self.screen_rect = game.screen.get_rect()
         self.killed_enable = False
         self.color = (150, 150, 150)
-        self.x = x
-        self.y = y
-        self.rect = pygame.Rect(self.x, self.y,
-                                game.get_block_width(),
-                                game.get_block_height())
 
 
 
@@ -316,7 +309,7 @@ class Game:
             for i in range(count):
                 x = ball.x
                 y = ball.y
-                diction = [random.uniform(-1, 1), random.uniform(-1, 1)]
+                diction = [random.uniform(-0.5, 0.5), random.uniform(-0.5, 0.5)]
                 new_ball = Ball(self, self.pandle, diction)
                 new_ball.x = x
                 new_ball.y = y
@@ -426,6 +419,7 @@ class Game:
         """碰撞砖块检测"""
         for ball in self.balls:
 
+            # 不是True|False, [block,block]
             collided_block = pygame.sprite.spritecollide(ball, self.blocks, False)
 
             # 如果碰到的的砖块killed_enable是True则改变方向并加分，否则不加分只改方向
