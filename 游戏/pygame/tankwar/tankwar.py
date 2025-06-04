@@ -51,7 +51,7 @@ class TankWar:
         return self.elements
 
 
-    def ran(self):
+    def run(self):
         self.audio.start()
         while True:
             self._check_events()
@@ -137,4 +137,4 @@ class TankWar:
 
 if __name__ == "__main__":
     tw = TankWar()
-    tw.ran()
+    tw.run()
