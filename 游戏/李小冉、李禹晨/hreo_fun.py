@@ -10,7 +10,7 @@ __MAX_HP__ = 2000
 # 主角最大内力值
 __MAX_MP__ = 100
 # 经验值列表
-__EXP_LIST__ = [100, 200, 300]
+__EXP_LIST__ = [0, 100, 200, 300]
 
 import sys
 
@@ -37,7 +37,7 @@ player = {
     maxMp: __MAX_MP__,  # 最大内力值
     dex: 30,
     exp: 0,  # 经验值
-    level: 1,  # 等级
+    level: 0,  # 等级
     skills: [
         {name: "普通攻击", attack: 300, mp: 0, aoe: False},
         {name: "华山剑法", attack: 200, mp: 10, aoe: False},
@@ -93,9 +93,45 @@ def player_turn():
     print(f"-" * __WIDTH__)
 
 
+def add_exp(enemy):
+    """增加经验值"""
+    if enemy[hp] <= 0:
+        player[exp] += enemy[exp]
+        print(f"{player[name]} +{enemy[exp]} 经验值")
+
+    level_up()
+
+
+def level_up():
+    """升级"""
+    _level = -1
+    # 根据经验值列表来升级
+    for _exp in __EXP_LIST__:
+        if player[exp] >= _exp:
+            _level += 1
+        else:
+            break
+
+    if player[level] < _level:
+        print(f"{player[name]} 升级到了 {_level} 级")
+        player[level] = _level
+
+
+def repeat_attack_player():
+    """敌人攻击玩家"""
+    for enemy in enemies:
+        # 判断敌人是否预备攻击能力：1.血量
+        if enemy[hp] <= 0:
+            continue
+        # 减去玩家血量
+        player[hp] -= enemy[attack]
+        print(f"['{enemy[name]}' 攻击了 '{player[name]}', -{enemy[attack]} 生命 {player[hp]}]")
+
+
 def enemies_turn():
     """敌人回合"""
-    pass
+    # TODO 回击玩家
+    repeat_attack_player()
 
 
 def check_winner():
@@ -146,16 +182,24 @@ def show_skills_info():
     print(f"{'选择技能':-^37}")
     for i, skill in enumerate(player[skills]):
         print(f"{i}.[{skill[name]}]")
-        print(f"\t攻击力:{skill[attack]}, 消耗内力:{skill[mp]}, AOE:{skill[aoe]}")
+        print(f"\t攻击力:{get_attack_value(skill)}, 消耗内力:{skill[mp]}, AOE:{skill[aoe]}")
     print(f"-" * __WIDTH__)
+
+
+def get_attack_value(skill):
+    """获取攻击力的值"""
+    return skill[attack] * (player[level] + 1)
 
 
 def attack_enemy(enemy_id, skill_id):
     """攻击敌人"""
     enemy = enemies[enemy_id]
     skill = player[skills][skill_id]
-    enemy[hp] -= skill[attack]
+    enemy[hp] -= get_attack_value(skill)
     print(f"[你攻击了 '{enemy[name]}', -{skill[attack]}生命！]")
+
+    # 增加经验
+    add_exp(enemy)
 
 
 def main():
@@ -190,8 +234,6 @@ def main():
         # TODO 回击
 
         enemies_turn()  # 敌人回合
-
-        print(enemies)
 
         # 判断游戏结果
         if check_winner():
