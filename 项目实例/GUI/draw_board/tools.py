@@ -101,6 +101,12 @@ class Menu:
                     self.brush.set_size(self.brush.get_size() - 0.5)
                 return True
 
+        # 点击颜色按钮事件
+        for i, rect in enumerate(self.colors_rect):
+            if rect.collidepoint(pos):
+                self.brush.set_color(self.colors[i])
+                return True
+
         # 点击橡皮事件
         for i, rect in enumerate(self.erasers_rect):
             if rect.collidepoint(pos):
@@ -145,9 +151,15 @@ class Brush:
 
     def set_color(self, color):
         self.color = color
-        for i in range(self.brush.get_width()):
-            for j in range(self.brush.get_height()):
-                self.brush.set_at((i, j), color + (self.brush_now.get_at((i, j)).a,))
+        # 获取 brush_now 的宽度和高度
+        width, height = self.brush_now.get_size()
+        for i in range(width):
+            for j in range(height):
+                if i < self.brush.get_width() and j < self.brush.get_height():
+                    # 保留原有的透明度
+                    alpha = self.brush_now.get_at((i, j)).a
+                    self.brush.set_at((i, j), color + (alpha,))
+
 
 
     def get_color(self):
