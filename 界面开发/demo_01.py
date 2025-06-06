@@ -21,7 +21,7 @@ root.minsize(400, 300)
 main_menu = Menu(root)
 
 file_menu = Menu(main_menu, tearoff=False)
-file_menu.add_command(label="打开")
+file_menu.add_command(label="打开", accelerator="Ctrl+N")
 file_menu.add_command(label="保存")
 file_menu.add_separator()
 file_menu.add_command(label="退出", command=root.quit)
