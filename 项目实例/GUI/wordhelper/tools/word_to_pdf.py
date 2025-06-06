@@ -1,5 +1,6 @@
 import os
-from docxtopdf import convert
+# from docxtopdf import convert
+import pypandoc
 from PyPDF2 import PdfFileReader
 
 
@@ -20,11 +21,11 @@ def word_to_pdf(file_list, target_path):
         target_file = os.path.join(target_path, file_name + ".pdf")
         try:
             # 转换
-            convert(file, target_file)
+            pypandoc.convert_file(file, "pdf", outputfile=target_file)
             # 转换后的PDF文件列表
             target_list.append(target_file)
-        except:
-            print("转换失败")
+        except Exception as e:
+            print("转换失败", e)
             return False
     return target_list
 
@@ -46,7 +47,7 @@ def word_to_pdf_1(file_list):
         target_file = os.path.join(os.path.dirname(file), file_name + ".pdf")
         # 转换
         try:
-            convert(file, target_file)
+            pypandoc.convert_file(file, "pdf", outputfile=target_file)
             # 统计PDF的页码数量
             if os.path.exists(target_file):
                 pages = get_pdf_page_number(target_file)
