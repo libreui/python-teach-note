@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>盒子(box) 位置</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+    }
+    .bg {
+      background-color: #999999;
+        width: 900px;
+        margin: 0 auto;
+        position: relative;
+    }
+    .bg-r {
+      background-color: #ff0000;
+    }
+    .bg-b {
+      background-color: #0000ff;
+    }
+    .size {
+      width: 200px;
+      height: 200px;
+    }
+    .size-30 {
+      width:30px;
+      height:30px;
+    }
+    .pos {
+      position: fixed;
+      right: 30px;
+      bottom: 30px;
+    }
+    .pos-1{
+      position: absolute;
+      /* 设置在右下角 */
+      bottom:0;
+    }
+    .ppp {
+        background-color: #aaaaff;
+        width: 50px;
+        height: 100px;
+        position: absolute;
+        top: 0;
+        right: -60px;
+    }
+
+  </style>
+</head>
+<body>
+<div style="background-color: black;height: 100px;width: 900px; margin: 0 auto">
+  d
+</div>
+<div class="bg-r size pos">
+  <div class="bg-b size-30 pos-1">
+
+  </div>
+</div>
+<div class="bg" style="height: 5000px;">
+  dd
+    <div class="ppp"></div>
+</div>
+</body>
+</html>
