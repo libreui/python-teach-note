@@ -294,8 +294,9 @@ class Game:
                     block = DarkBlock(self, i * _space, j * _space)
                 else:
                     block = Block(self, i * _space, j * _space)
+                    self.total_point += 1
                 self.blocks.add(block)
-                self.total_point += 1
+
 
     def _feet_balls(self):
         for i in range(self.ball_count):
