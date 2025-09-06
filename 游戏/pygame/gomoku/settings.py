@@ -7,6 +7,7 @@ class Settings:
         self.mode_two = 2
 
         self.title = '五子棋 by Libre'
+        self.bg_img = "./static/gomoku_bg.jpg"
         self.icon_img = './static/gomoku_icon.png'
         self.button_img_ai = './static/ai.png'
         self.button_img_two = './static/tow.png'
@@ -30,4 +31,4 @@ class Settings:
         self.board_side = self.cell_size // 2
         self.chess_size = 20
 
-        self.bg_img = "./static/gomoku_bg.jpg"
+
