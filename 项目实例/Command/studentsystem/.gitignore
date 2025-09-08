@@ -1,0 +1,6 @@
+./build
+./dist
+./*.spec
+/studentsystem.spec
+/dist/
+/build/

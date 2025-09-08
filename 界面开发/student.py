@@ -9,7 +9,7 @@ import csv
 current_csv_path = ''
 
 window = tk.Tk()
-window.title('学生信息管理系统')
+window.title('studentsystem')
 
 WIDTH = 600
 HEIGHT = 400
@@ -87,6 +87,10 @@ def save_file():
 
 def save_as():
     """另存为CSV文件"""
+    # treeview_data = [treeview.item(i)["values"] for i in treeview.get_children()]
+    for i in treeview.get_children():
+        item = treeview.item(i)
+        print(item["values"])
     pass
 
 

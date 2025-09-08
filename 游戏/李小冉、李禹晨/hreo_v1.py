@@ -3,6 +3,7 @@ import random
 
 
 def printr(content):
+    """逐字打印"""
     for c in content:
         print(c, end='', flush=True)
         time.sleep(0.1)

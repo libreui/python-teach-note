@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <h1>Welcome to my website</h1>
+    <p>Here is some text about me</p>
+
+    {% for post in posts %}
+
+    <h2>{{ post.title }}</h2>
+    <p>{{ post.content }}</p>
+    {% endfor %}
+</body>
+</html>

@@ -145,6 +145,7 @@ class Gomoku:
         if self.stats.win >= 0:
             self.stats.ai_running = False
             return
+        # 计算AI落子点
         ai_pos_row, ai_pos_col = self.ai.get_best_move()
         ret = self.board.make_move(ai_pos_row, ai_pos_col, self.stats.current_player)
         if ret:

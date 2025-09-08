@@ -6,23 +6,46 @@ window.resizable(False, False)
 
 # 计算的得数
 eqNum = 0
+prevNum = "0"
+operator = ""
+currentNum = "0"
 
 value = tk.StringVar()
-tk.Entry(window, width=10, font=("楷体", 30), textvariable=value, justify=tk.RIGHT).grid(row=0, columnspan=4)
+tk.Entry(window, width=10, font=("楷体", 30),
+         textvariable=value, justify=tk.RIGHT,).grid(row=0, columnspan=4,)
 value.set("0")
 
 
 def callback(arg):
     """按钮点击"""
-    value.set(str(arg))
-    # TODO 记录点击的按钮数字还是符号，入栈
-    # 如果是数字累计，直到按下了一个符号
-    # 如果是等号，就计算结果
+    global currentNum, operator, prevNum
+    if arg in list("+-*/"):
+        if operator == "":
+            prevNum = str2int2str(currentNum)
+        else:
+            currentNum = str2int2str(currentNum)
+            prevNum = str2int2str(prevNum)
+            prevNum = eval(prevNum + operator + currentNum)
+        currentNum = "0"
+        operator = arg
+        value.set(prevNum)
+    else:
+        currentNum += str(arg)
+        value.set(str2int2str(currentNum))
+
+
+def str2int2str(s):
+    """字符串转整数再转字符串"""
+    return str(int(s))
 
 
 def clear():
+    global currentNum, operator, prevNum
     """清空计算"""
-    pass
+    currentNum = "0"
+    operator = ""
+    prevNum = "0"
+    value.set("0")
 
 
 def setSymbol():
@@ -35,13 +58,16 @@ def setPercent():
     pass
 
 
+# prevNum = eval(prevNum + operator + "9")
+
+
 tk.Button(window, text="AC", command=clear).grid(row=1, column=0, sticky=tk.EW)
 
 tk.Button(window, text="+/-", command=setSymbol).grid(row=1, column=1, sticky=tk.EW)
 tk.Button(window, text="%", command=setPercent).grid(row=1, column=2, sticky=tk.EW)
 
 btnDiv = tk.Button(window, text="÷")
-btnDiv.config(command=lambda: callback("-"))
+btnDiv.config(command=lambda: callback("/"))
 btnDiv.grid(row=1, column=3, sticky=tk.EW)
 
 btn7 = tk.Button(window, text="7")
@@ -57,7 +83,7 @@ btn9.config(command=lambda: callback(9))
 btn9.grid(row=2, column=2, sticky=tk.EW)
 
 btnX = tk.Button(window, text="×")
-btnX.config(command=lambda: callback("x"))
+btnX.config(command=lambda: callback("*"))
 btnX.grid(row=2, column=3, sticky=tk.EW)
 
 btn4 = tk.Button(window, text="4")

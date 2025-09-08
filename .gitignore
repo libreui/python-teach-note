@@ -1,3 +1,11 @@
-/.idea
+**/.idea/
 /爬虫/data/images/
 /爬虫/data/chapter/
+/项目实例/Command/pollcode/barcode/
+/项目实例/Command/pollcode/codeadd/
+/项目实例/Command/pollcode/codepath/
+/项目实例/Command/pollcode/qrcode/
+/项目实例/GUI/character_painting/input_img/cat.jpg
+**/.DS_Store/
+**/__pycache__/
+/爬虫/data/www.ybrbnews.cn/data/
