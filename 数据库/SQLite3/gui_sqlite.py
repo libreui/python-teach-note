@@ -11,7 +11,7 @@ cursor = conn.cursor()
 sql = f"select publisher from {TABLE_NAME} group by publisher"
 cursor.execute(sql)
 publishers = [i[0] for i in cursor.fetchall()]
-# 排序
+# 05_排序
 publishers.sort()
 
 
@@ -20,7 +20,7 @@ def get_category():
     sql = f"select category from {TABLE_NAME} group by category"
     cursor.execute(sql)
     categories = [i[0] for i in cursor.fetchall()]
-    # 排序
+    # 05_排序
     categories.sort()
     return categories
 
