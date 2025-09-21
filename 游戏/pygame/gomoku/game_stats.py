@@ -11,6 +11,7 @@ class GameStats:
         self.mode = None
         self.ai_running = False
 
+
     def reset_stats(self):
         # 初始化当前玩家为 None
         self.current_player = None

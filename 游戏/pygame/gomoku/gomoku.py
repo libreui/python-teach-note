@@ -26,6 +26,9 @@ class Gomoku:
         # 实例化ai
         self.ai = GomokuAI(self.board.board)
 
+        # 创建按钮
+        self.__create_button()
+
     def start(self):
         """游戏开始"""
         while True:
@@ -98,13 +101,15 @@ class Gomoku:
                            (col * self.settings.cell_size + self.settings.board_side,
                             row * self.settings.cell_size + self.settings.board_side), 5)
 
-    def __draw_button(self):
-        """绘制按钮"""
+    def __create_button(self):
+        """创建按钮"""
         self.ai_button = Button(self, self.settings.button_img_ai)
         self.two_button = Button(self, self.settings.button_img_two)
         self.ai_button.rect.centerx = self.screen_rect.centerx - 100
         self.two_button.rect.centerx = self.screen_rect.centerx + 100
 
+    def __draw_button(self):
+        """绘制按钮"""
         self.ai_button.draw()
         self.two_button.draw()
 
