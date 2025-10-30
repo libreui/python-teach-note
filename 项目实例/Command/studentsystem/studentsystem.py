@@ -236,7 +236,7 @@ def menu():
     |   2 查找学生信息                               |
     |   3 删除学生信息                               |
     |   4 修改学生信息                               |
-    |   5 05_排序                                      |
+    |   5 D_05_排序                                      |
     |   6 统计学生总人数                             |
     |   7 显示所有学生信息                            |
     |   0 退出系统                                  |
@@ -277,7 +277,7 @@ def main():
             elif option_int == 4:
                 modify()  # 修改学生信息
             elif option_int == 5:
-                sort()  # 05_排序
+                sort()  # D_05_排序
             elif option_int == 6:
                 total()  # 统计学生总人数
             elif option_int == 7:
