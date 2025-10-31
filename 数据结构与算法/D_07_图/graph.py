@@ -4,6 +4,7 @@ class Graph:
     def __init__(self):
         self.vert_list = {}
         self.num_vertices = 0
+        self.num_edges = 0
 
     def add_vertex(self, key):
         self.num_vertices += 1
@@ -17,6 +18,7 @@ class Graph:
         if to_vert not in self.vert_list:
             self.add_vertex(to_vert)
         self.vert_list[from_vert].add_neighbor(self.vert_list[to_vert], weight)
+        self.num_edges += 1
 
     def get_vertex(self, key):
         if key in self.vert_list:
@@ -32,6 +34,7 @@ class Graph:
 
     def __iter__(self):
         return iter(self.vert_list.values())
+
 
 
 if __name__ == '__main__':
