@@ -14,12 +14,39 @@ class DFSGraph(Graph):
             if a_vertex.get_color() == 'white':
                 self.dfs_visit(a_vertex)  # 修复了这里，之前没有调用dfs_visit
 
+    def dfs_t(self):
+        for a_vertex in self:
+            a_vertex.set_color('white')
+            a_vertex.set_predecessor(-1)
+
+        # 根据完成时间排序顶点
+        sorted_vertices = sorted(self, key=lambda x: x.get_finish(), reverse=True)
+
+        for a_vertex in sorted_vertices:
+            if a_vertex.get_color() == 'white':
+                self.dfs_visit_t(a_vertex)  # 修复了这里，之前没有调用dfs_visit
+
     def dfs_visit(self, start_vertex):
         start_vertex.set_color('gray')
         self.time += 1
         start_vertex.set_discovery(self.time)
         # 修复了遍历方式，应该遍历当前顶点的邻接顶点，而不是整个图
         for next_vertex in start_vertex.get_connections():
+            if next_vertex.get_color() == 'white':
+                next_vertex.set_predecessor(start_vertex)
+                self.dfs_visit(next_vertex)
+        start_vertex.set_color('black')
+        self.time += 1
+        start_vertex.set_finish(self.time)
+
+    def dfs_visit_t(self, start_vertex):
+        start_vertex.set_color('gray')
+        self.time += 1
+        start_vertex.set_discovery(self.time)
+        # 根据完成时间对每个邻接顶点进行排序
+        sorted_connections = sorted(start_vertex.get_connections(), key=lambda x: x.get_finish(), reverse=False)
+        # 修复了遍历方式，应该遍历当前顶点的邻接顶点，而不是整个图
+        for next_vertex in sorted_connections:
             if next_vertex.get_color() == 'white':
                 next_vertex.set_predecessor(start_vertex)
                 self.dfs_visit(next_vertex)
