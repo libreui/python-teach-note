@@ -11,7 +11,7 @@ class Vertex:
         """
         self.id = key  # 顶点的唯一标识符
         self.connected_to = {}  # 存储与当前顶点相邻的顶点及其权重的字典
-        self.distance = 0
+        self.distance = 0 # 起始顶点到当前顶点的距离，初始化为0
         self.predecessor = None
         self.color = 'white'
         self.discovery = 0  # 顶点被发现的时间戳
