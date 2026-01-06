@@ -23,6 +23,6 @@ txt_phone = tk.Label(frame_row2, text="电话：")
 txt_phone.pack(side=tk.LEFT, anchor=tk.NW)
 edit_phone = tk.Entry(frame_row2)
 edit_phone.pack(side=tk.LEFT, anchor=tk.NW)
-tk.L
+
 
 tk.mainloop()
