@@ -17,7 +17,7 @@ class Minesweeper:
     def _init_mines(self):
         for i in range(self.config.mines_size):
             for j in range(self.config.mines_size):
-                self.state.mines[i][j] = Mine(self, i * self.config.mines_size, j * self.config.mines_size)
+                self.state.mines[i][j] = Mine(self, i, j)
 
     def _check_events(self):
         for event in pygame.event.get():
@@ -25,14 +25,21 @@ class Minesweeper:
                 pygame.quit()
                 exit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                self._check_mines_clicked()
+                self._check_mines_clicked(event)
 
-    def _check_mines_clicked(self):
+    def _check_mines_clicked(self, event):
         pos = pygame.mouse.get_pos()
-        for row in self.state.mines:
-            for mine in row:
-                if mine is not None:
-                    mine.on_mouse_down(pos)
+        # 区分左键还是右键
+        if event.button == 1: # 左键点击
+            for row in self.state.mines:
+                for mine in row:
+                    if mine is not None:
+                        mine.on_mouse_left_down(pos)
+        elif event.button == 3: # 右键点击
+            for row in self.state.mines:
+                for mine in row:
+                    if mine is not None:
+                        mine.on_mouse_right_down(pos)
 
 
     def run(self):
@@ -73,12 +80,14 @@ class State:
 
 
 class Mine(Sprite):
-    def __init__(self, game, x, y):
+    def __init__(self, game, row, col):
         super().__init__()
         self.screen = game.screen
         self.config = game.config
-        self.x = x
-        self.y = y
+        self.x = row * self.config.mines_size
+        self.y = col * self.config.mines_size
+        self.mark = False
+        self.is_clicked = False
 
         self.image = pygame.image.load("./image/9.gif")
         self.rect = self.image.get_rect()
@@ -88,9 +97,23 @@ class Mine(Sprite):
     def draw(self):
         self.screen.blit(self.image, self.rect)
 
-    def on_mouse_down(self, pos):
+    def on_mouse_right_down(self, pos):
         if self.rect.collidepoint(pos):
+            if self.is_clicked:
+                return
+            self.mark = not self.mark
+            if self.mark:
+                self.image = pygame.image.load("./image/10.gif")
+            else:
+                self.image = pygame.image.load("./image/9.gif")
+
+
+    def on_mouse_left_down(self, pos):
+        if self.rect.collidepoint(pos) and self.mark is not True:
             self.image = pygame.image.load("./image/0.jpg")
+            self.is_clicked = True
+
+
 
 
 
