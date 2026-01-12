@@ -1,7 +1,8 @@
 import tkinter as tk
-from tkinter import *
+from tkinter import Button, Scrollbar, NO, END, N, S, E, W, NW, LEFT
 from tkinter import ttk
 from tkinter import messagebox
+from tkinter.ttk import Treeview
 import tkinter.filedialog as tkFileDialog
 import csv
 
@@ -41,6 +42,7 @@ def new_file():
 def open_file():
     """打开CSV文件"""
     global current_csv_path
+    content = []
     file_path = tkFileDialog.askopenfilename(
         title="打开文件",
         filetypes=[('CSV', '*.csv')],
