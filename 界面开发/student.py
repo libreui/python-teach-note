@@ -67,8 +67,8 @@ def insertTreeView(content):
     # 删除所有数据
     treeview.delete(*treeview.get_children())
 
-    for i in range(len(content)-1):
-        treeview.insert('', END, values=[i] + content[i+1])
+    for i in range(len(content) - 1):
+        treeview.insert('', END, values=[i] + content[i + 1])
 
 
 def save_file():
@@ -104,7 +104,6 @@ def delete_selected():
 
 
 def add_student():
-
     if current_csv_path == '':
         messagebox.showinfo("提示", "请先打开或新建一个CSV文件")
         return
@@ -133,7 +132,9 @@ def add_student():
     sex_entry.place(x=100, y=100)
 
     # 创建确认按钮
-    confirm_btn = tk.Button(new_win, text="确认", command=lambda: add_student_info(class_entry.get(), name_entry.get(), age_entry.get(), sex_entry.get()))
+    confirm_btn = tk.Button(new_win, text="确认",
+                            command=lambda: add_student_info(class_entry.get(), name_entry.get(), age_entry.get(),
+                                                             sex_entry.get()))
     confirm_btn.place(x=100, y=130)
 
     def add_student_info(class_name, name, age, sex):
@@ -144,7 +145,16 @@ def add_student():
         new_win.destroy()
 
 
-
+def on_treeview_edit(event):
+    """编辑treeview中的数据"""
+    selected_item = treeview.selection()
+    if not selected_item:
+        messagebox.showinfo("提示", "请先选择要编辑的行")
+        return
+    item = treeview.item(selected_item[0])
+    # values = item["values"]
+    print(selected_item)
+    print(item)
 
 
 menubar = tk.Menu(window)
@@ -164,9 +174,8 @@ menubar.add_cascade(label="文件", menu=fileMenu)
 # 显示菜单
 window.config(menu=menubar)
 
-
 frame = tk.Frame(window)
-frame.place(x=0, y=40, width=WIDTH, height=HEIGHT-40)
+frame.place(x=0, y=40, width=WIDTH, height=HEIGHT - 40)
 scrollbar = tk.Scrollbar(frame)
 scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 # treeview
@@ -174,7 +183,7 @@ treeview = ttk.Treeview(
     frame,
     columns=("id", "class", "name", "age", "sex"),
     show='headings',
-    yscrollcommand=scrollbar.set
+    yscrollcommand=scrollbar.set,
 )
 
 treeview.column('id', width=30, stretch=NO)
@@ -190,10 +199,24 @@ treeview.heading('name', text="姓名")
 treeview.heading('age', text="年龄")
 treeview.heading('sex', text="性别")
 
-
 treeview.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 # 绑定表格滚动条
 scrollbar.config(command=treeview.yview)
+
+# 绑定双击编辑
+treeview.bind("<Double-1>", on_treeview_edit)
+
+# 绑定右键菜单
+context_menu = tk.Menu(window, tearoff=False)
+context_menu.add_command(label='编辑')
+context_menu.add_command(label='删除')
+
+
+def show_context_menu(event):
+    context_menu.post(event.x_root, event.y_root)
+
+# 绑定右键单击显示菜单
+treeview.bind("<Button-1>", show_context_menu)
 
 # 创建添加按钮
 btnAdd = tk.Button(window, text="添加", command=add_student)
@@ -202,6 +225,5 @@ btnAdd.pack(side=LEFT, anchor=NW)
 # 创建删除按钮
 btnDelete = tk.Button(window, text="删除", command=delete_selected)
 btnDelete.pack(side=LEFT, anchor=NW)
-
 
 tk.mainloop()
