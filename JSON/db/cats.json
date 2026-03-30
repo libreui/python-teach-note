@@ -1,0 +1,20 @@
+[
+    {
+        "name": "Kitty",
+        "age": 1,
+        "eye-color": "blue",
+        "hair-color": "red"
+    },
+    {
+        "name": "Kitty",
+        "age": 2,
+        "eye-color": "blue",
+        "hair-color": "red"
+    },
+    {
+        "name": "Kitty",
+        "age": 3,
+        "eye-color": "blue",
+        "hair-color": "red"
+    }
+]
