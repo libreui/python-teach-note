@@ -1,10 +1,12 @@
+import pprint
+import random
 import pygame
 from pygame.sprite import Sprite
 
 
 class Minesweeper:
     """扫雷游戏的主类，负责游戏的初始化和运行"""
-    
+
     def __init__(self):
         """初始化游戏的配置、状态和界面"""
         # 创建游戏配置对象
@@ -26,9 +28,18 @@ class Minesweeper:
 
     def _init_mines(self):
         """初始化地雷网格，创建所有地雷格子对象"""
-        for i in range(self.config.mines_size):
-            for j in range(self.config.mines_size):
+        for i in range(self.config.grid_size):
+            for j in range(self.config.grid_size):
                 self.state.mines[i][j] = Mine(self, i, j)
+
+        # 给格子随机分配地雷
+        self._assign_mines()
+
+        # 计算所有地雷格子周围地雷数量
+        for row in self.state.mines:
+            for mine in row:
+                if mine is not None:
+                    self._calculate_adjacent_mine(mine)
 
     def _check_events(self):
         """处理游戏事件（键盘、鼠标等）"""
@@ -41,21 +52,24 @@ class Minesweeper:
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 self._check_mines_clicked(event)
 
+
+
     def _check_mines_clicked(self, event):
         """处理鼠标点击地雷格子的事件"""
         # 获取鼠标点击位置
         pos = pygame.mouse.get_pos()
-        # 区分左键还是右键
-        if event.button == 1:  # 左键点击
-            for row in self.state.mines:
-                for mine in row:
-                    if mine is not None:
-                        mine.on_mouse_left_down(pos)
-        elif event.button == 3:  # 右键点击
-            for row in self.state.mines:
-                for mine in row:
-                    if mine is not None:
-                        mine.on_mouse_right_down(pos)
+        pos_x, pos_y = pos
+
+        row = pos_x // self.config.mines_size
+        col = pos_y // self.config.mines_size
+
+        # 当前被点击的格子
+        clicked_mine = self.state.mines[row][col]
+
+        if event.button == 1:
+            clicked_mine.on_mouse_left_down(pos)
+        elif event.button == 3:
+            clicked_mine.on_mouse_right_down(pos)
 
     def run(self):
         """游戏主循环"""
@@ -80,10 +94,45 @@ class Minesweeper:
                 if mine is not None:
                     mine.draw()
 
+    def _assign_mines(self):
+        """给格子随机分配地雷"""
+        # 随机打乱所有格子的顺序
+        mine_positions = list(range(self.config.grid_size ** 2))
+        random.shuffle(mine_positions)
+
+        # 分配地雷
+        for i in mine_positions[:self.config.mine_count]:
+            row, col = divmod(i, self.config.grid_size)
+            self.state.mines[row][col].is_mine = True
+
+    def _calculate_adjacent_mine(self, mine):
+        """计算当前被点击格子周围格子的周围地雷数量"""
+        # 如果是地雷格子，不计算
+        if mine.is_mine:
+            return
+
+        # 计算出他周围的8个格子坐标
+        adjacent_mines = self._get_adjacent_mines(mine)
+
+        # 计算出当前格子周围地雷数量
+        mine.number = sum(1 for row, col in adjacent_mines if self.state.mines[row][col].is_mine)
+
+    def _get_adjacent_mines(self, mine):
+        """获取当前格子周围的所有格子"""
+        adjacent_mines = []
+        for i in range(-1, 2):
+            for j in range(-1, 2):
+                if i == 0 and j == 0: # 自己
+                    continue
+                adjacent_mines.append((mine.row + i, mine.col + j))
+        # 过滤出有效坐标（在网格范围内）
+        valid_adjacent_mines = [mine for mine in adjacent_mines if 0 <= mine[0] < self.config.grid_size and 0 <= mine[1] < self.config.grid_size]
+        return valid_adjacent_mines
+
 
 class Config:
     """游戏配置类，存储游戏的各种参数"""
-    
+
     def __init__(self):
         """初始化游戏配置参数"""
         # 游戏窗口标题
@@ -93,6 +142,8 @@ class Config:
         self.mines_size = 25
         # 每个格子的像素大小
         self.grid_size = 10
+        # 地雷数量
+        self.mine_count = self.grid_size ** 2 // 3
 
         # 游戏窗口宽度（网格大小 × 格子像素大小）
         self.width = self.mines_size * self.grid_size
@@ -106,18 +157,19 @@ class Config:
 
 class State:
     """游戏状态类，存储游戏的当前状态"""
-    
+
     def __init__(self, config):
         """初始化游戏状态"""
         self.config = config
         # 创建地雷网格（二维列表），初始值为None
         # 用于存储每个格子的地雷对象
-        self.mines = [[None for _ in range(self.config.mines_size)] for _ in range(self.config.mines_size)]
+        self.mines: list[list[Mine | None]] = [[None for _ in range(self.config.grid_size)] for _ in
+                                               range(self.config.grid_size)]
 
 
 class Mine(Sprite):
     """地雷格子类，继承自Sprite，负责单个地雷格子的显示和交互"""
-    
+
     def __init__(self, game, row, col):
         """初始化地雷格子"""
         super().__init__()
@@ -125,6 +177,10 @@ class Mine(Sprite):
         self.screen = game.screen
         # 游戏配置对象
         self.config = game.config
+        # 行列
+        self.row = row
+        self.col = col
+
         # 格子的行坐标（像素）
         self.x = row * self.config.mines_size
         # 格子的列坐标（像素）
@@ -133,6 +189,10 @@ class Mine(Sprite):
         self.mark = False
         # 点击状态（是否被左键点击）
         self.is_clicked = False
+        # 地雷数量
+        self.is_mine = False
+        # 格子的数字（0-8）
+        self.number = 0
 
         # 加载初始图像（未点击状态）
         self.image = pygame.image.load("./image/9.gif")
@@ -143,7 +203,23 @@ class Mine(Sprite):
 
     def draw(self):
         """在屏幕上绘制地雷格子"""
+        self.draw_number()
         self.screen.blit(self.image, self.rect)
+
+    def draw_number(self):
+        """绘制格子的数字"""
+        """
+        1. 自己不是雷
+        2. 自己没有被点击
+        3. 自己有数字
+        """
+        if (not self.is_mine
+                and self.is_clicked
+                and self.number > 0):
+            # 加载数字图像
+            self.image = pygame.image.load(f"./image/{self.number}.gif")
+            self.is_clicked = True
+
 
     def on_mouse_right_down(self, pos):
         """处理鼠标右键点击事件"""
@@ -156,7 +232,7 @@ class Mine(Sprite):
             self.mark = not self.mark
             # 根据标记状态更新图像
             if self.mark:
-                # 标记为地雷的图像
+                # 标记为旗子的图像
                 self.image = pygame.image.load("./image/10.gif")
             else:
                 # 未标记的图像
@@ -164,12 +240,24 @@ class Mine(Sprite):
 
     def on_mouse_left_down(self, pos):
         """处理鼠标左键点击事件"""
+
+        if self.is_clicked:
+            return
+
         # 检查鼠标是否点击在当前格子上，且格子未被标记
         if self.rect.collidepoint(pos) and self.mark is not True:
-            # 更新为已点击的图像（数字0）
-            self.image = pygame.image.load("./image/0.jpg")
+            if self.is_mine:
+                # 显示地雷数量
+                self.image = pygame.image.load(f"./image/11.gif")
+            else:
+                # 更新为已点击的图像（数字0）
+                self.image = pygame.image.load("./image/0.jpg")
             # 设置为已点击状态
             self.is_clicked = True
+
+
+    def __repr__(self):
+        return f"Mine({self.row}, {self.col})"
 
 
 if __name__ == "__main__":
