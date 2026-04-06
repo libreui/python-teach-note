@@ -1,8 +1,6 @@
 import random
 import sys
-
 import pygame
-from pygame.examples.testsprite import update_rects
 from pygame.sprite import Sprite
 
 
