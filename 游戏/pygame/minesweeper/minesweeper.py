@@ -2,6 +2,7 @@ import random
 import sys
 
 import pygame
+from pygame.examples.testsprite import update_rects
 from pygame.sprite import Sprite
 
 
@@ -24,6 +25,15 @@ class Minesweeper:
         # 创建游戏时钟（控制帧率）
         self.clock = pygame.time.Clock()
 
+        # 加载所有图像
+        Mine.load_images()
+
+        # 创建精灵编组
+        self.mine_sprites = pygame.sprite.Group()
+
+        # 记录状态变化的格子
+        self.changed_mines = set()
+
         # 初始化地雷网格
         self._init_mines()
 
@@ -31,7 +41,10 @@ class Minesweeper:
         """初始化地雷网格，创建所有地雷格子对象"""
         for i in range(self.config.grid_size):
             for j in range(self.config.grid_size):
-                self.state.mines[i][j] = Mine(self, i, j)
+                mine = Mine(self, i, j)
+                self.state.mines[i][j] = mine
+                # 将所有地雷格子添加到精灵编组
+                self.mine_sprites.add(mine)
 
         # 给格子随机分配地雷
         self._assign_mines()
@@ -58,41 +71,65 @@ class Minesweeper:
     def _check_mines_clicked(self, event):
         """处理鼠标点击地雷格子的事件"""
         # 获取鼠标点击位置
-        pos_x, pos_y = pygame.mouse.get_pos()
+        pos = event.pos
 
-        row = pos_x // self.config.mines_size
-        col = pos_y // self.config.mines_size
+        if not (0 <= pos[0] < self.config.width and 0 <= pos[1] < self.config.height):
+                return
+
+        row = pos[0] // self.config.mines_size # x坐标对应的行索引
+        col = pos[1] // self.config.mines_size # y坐标对应的列索引
 
         # 当前被点击的格子
-        clicked_mine: Mine = self.state.mines[row][col]
+        clicked_mine: Mine = self.state.mines[row][col] # type: ignore
 
-        if event.button == 1:
+        if event.button == 1: # 左键
             self._open_mines(clicked_mine)
-        elif event.button == 3:
+        elif event.button == 3: # 右键
             clicked_mine.set_mark()
 
     def run(self):
         """游戏主循环"""
+        # 首次绘制所有格子
+        self.screen.fill(self.config.bg_color)
+        self.mine_sprites.draw(self.screen)
+        pygame.display.flip()
+
         while True:
-            # 填充背景色
-            self.screen.fill(self.config.bg_color)
             # 控制帧率
-            self.clock.tick(self.config.fps)
+            if not self.changed_mines:
+                self.clock.tick(10)
+            else:
+                self.clock.tick(self.config.fps)
+
             # 处理事件
             self._check_events()
 
             # 绘制所有地雷格子
             self._draw_mines()
 
-            # 更新屏幕显示
-            pygame.display.flip()
+            # 更新屏幕显示(移除，因为在_draw_mines中已经更新了)
+            # pygame.display.flip()
 
     def _draw_mines(self):
         """绘制所有地雷格子"""
-        for row in self.state.mines:
-            for mine in row:
-                if mine is not None:
-                    mine.draw()
+        if self.changed_mines:
+
+            # 收集记录需要重绘的格子
+            update_rects  = [mine.rect for mine in self.changed_mines]
+
+            # 绘制状态变化的格子
+            for mine in self.changed_mines:
+                # 绘制一个格子背景，覆盖掉之前的格子
+                pygame.draw.rect(self.screen, self.config.bg_color, mine.rect)
+                # 绘制当前格子的图片
+                self.screen.blit(mine.image, mine.rect)
+
+            # 更新屏幕显示
+            pygame.display.update(update_rects)
+
+            # 清空状态变化的格子集合
+            self.changed_mines.clear()
+
 
     def _assign_mines(self):
         """给格子随机分配地雷"""
@@ -137,33 +174,40 @@ class Minesweeper:
         3. 打开当前格子
         4. 递归搜索其他格子（只搜索未翻开且非地雷的格子）
         """
+        stack = [mine]
 
-        # 如果已经翻开，不递归
-        if mine.is_opened:
-            return
+        while stack:
+            current_mine = stack.pop()
 
-        # 打开当前格子
-        mine.set_opened()
+            # 如果已经翻开，不递归
+            if current_mine.is_opened:
+                continue
 
-        # 如果是地雷格子，不递归
-        # 如果当前格子周围地雷数量不为0，不递归
-        if mine.is_mine or mine.number != 0:
-            return
+            # 打开当前格子
+            current_mine.set_opened()
 
-        # 当前格子的行列
-        row = mine.row
-        col = mine.col
+            # 如果是地雷格子，不递归
+            # 如果当前格子周围地雷数量不为0，不递归
+            if current_mine.is_mine or current_mine.number != 0:
+                continue
 
-        # 递归搜索其他格子
-        for dr, dc in self.config.offsets:
-            # 检查边界条件，确保不会访问到网格外的格子
-            new_row = row + dr
-            new_col = col + dc
-            if 0 <= new_row < self.config.grid_size and 0 <= new_col < self.config.grid_size:
-                # 获取相邻格子
-                adjacent_mine: Mine = self.state.mines[new_row][new_col]
-                # 如果相邻格子周围地雷数量为0，递归翻开
-                self._open_mines(adjacent_mine)
+            # 当前格子的行列
+            row = current_mine.row
+            col = current_mine.col
+
+            # 递归搜索其他格子
+            for dr, dc in self.config.offsets:
+
+                new_row = row + dr
+                new_col = col + dc
+
+                # 检查边界条件，确保不会访问到网格外的格子
+                if 0 <= new_row < self.config.grid_size and 0 <= new_col < self.config.grid_size:
+                    # 获取相邻格子
+                    adjacent_mine = self.state.mines[new_row][new_col]
+                    # 如果相邻格子周围地雷数量为0，递归翻开
+                    if isinstance(adjacent_mine, Mine) and not adjacent_mine.is_opened:
+                        stack.append(adjacent_mine)
 
 
 
@@ -212,9 +256,37 @@ class State:
 class Mine(Sprite):
     """地雷格子类，继承自Sprite，负责单个地雷格子的显示和交互"""
 
+    images = {}
+
+    images_loaded = False
+
+    @classmethod
+    def load_images(cls):
+        if not cls.images_loaded:
+            try:
+                cls.images = {
+                    "closed": pygame.image.load("./image/9.gif"),
+                    "mine": pygame.image.load("./image/11.gif"),
+                    "marked": pygame.image.load("./image/10.gif"),
+                    "0": pygame.image.load("./image/0.jpg"),
+                    "1": pygame.image.load("./image/1.gif"),
+                    "2": pygame.image.load("./image/2.gif"),
+                    "3": pygame.image.load("./image/3.gif"),
+                    "4": pygame.image.load("./image/4.gif"),
+                    "5": pygame.image.load("./image/5.gif"),
+                    "6": pygame.image.load("./image/6.gif"),
+                    "7": pygame.image.load("./image/7.gif"),
+                    "8": pygame.image.load("./image/8.gif"),
+                }
+                cls.images_loaded = True
+            except pygame.error as e:
+                print(f"加载图像失败: {e}")
+
     def __init__(self, game, row, col):
         """初始化地雷格子"""
         super().__init__()
+        # 游戏对象
+        self.game = game
         # 游戏窗口对象
         self.screen = game.screen
         # 游戏配置对象
@@ -236,8 +308,11 @@ class Mine(Sprite):
         # 格子的数字（0-8）
         self.number = 0
 
+        # 预加载所有图像
+        Mine.load_images()
+
         # 加载初始图像（未点击状态）
-        self.image = pygame.image.load("./image/9.gif")
+        self.image = Mine.images["closed"]
         # 获取图像的矩形区域
         self.rect = self.image.get_rect()
         # 设置图像在屏幕上的位置
@@ -249,20 +324,20 @@ class Mine(Sprite):
         # 首先区分格子是否被翻开了
         if self.is_opened:
             if self.is_mine:
-                self.image = pygame.image.load("./image/11.gif")
+                self.image = Mine.images["mine"]
             elif self.number > 0:
-                self.image = pygame.image.load(f"./image/{self.number}.gif")
+                self.image = Mine.images[str(self.number)]
             else:
-                self.image = pygame.image.load(f"./image/0.jpg")
+                self.image = Mine.images["0"]
         elif self.is_marked:
-            self.image = pygame.image.load("./image/10.gif")
+            self.image = Mine.images["marked"]
         else:
-            self.image = pygame.image.load("./image/9.gif")
+            self.image = Mine.images["closed"]
 
-    def draw(self):
-        """在屏幕上绘制地雷格子"""
-        self._set_image()
-        self.screen.blit(self.image, self.rect)
+    # def draw(self, screen):
+    #     """在屏幕上绘制地雷格子"""
+    #     self._set_image()
+    #     screen.blit(self.image, self.rect)
 
 
     def set_mark(self):
@@ -272,6 +347,12 @@ class Mine(Sprite):
 
         self.is_marked = not self.is_marked
 
+        # 更新图像
+        self._set_image()
+
+        # 记录状态变化的格子
+        self.game.changed_mines.add(self)
+
 
     def set_opened(self):
         """设置格子为已翻开状态"""
@@ -279,6 +360,12 @@ class Mine(Sprite):
             return
 
         self.is_opened = True
+
+        # 更新图像
+        self._set_image()
+
+        # 记录状态变化的格子
+        self.game.changed_mines.add(self)
 
 
     def __repr__(self):
