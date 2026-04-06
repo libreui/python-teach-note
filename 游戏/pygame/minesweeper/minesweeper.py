@@ -1,5 +1,8 @@
 import pprint
 import random
+import sys
+from typing import Optional
+
 import pygame
 from pygame.sprite import Sprite
 
@@ -47,7 +50,7 @@ class Minesweeper:
             # 处理窗口关闭事件
             if event.type == pygame.QUIT:
                 pygame.quit()
-                exit()
+                sys.exit()
             # 处理鼠标点击事件
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 self._check_mines_clicked(event)
@@ -67,7 +70,8 @@ class Minesweeper:
         clicked_mine = self.state.mines[row][col]
 
         if event.button == 1:
-            clicked_mine.on_mouse_left_down(pos)
+            # clicked_mine.on_mouse_left_down(pos)
+            self._open_adjacent_mines(clicked_mine)
         elif event.button == 3:
             clicked_mine.on_mouse_right_down(pos)
 
@@ -129,6 +133,43 @@ class Minesweeper:
         valid_adjacent_mines = [mine for mine in adjacent_mines if 0 <= mine[0] < self.config.grid_size and 0 <= mine[1] < self.config.grid_size]
         return valid_adjacent_mines
 
+    def _open_adjacent_mines(self, mine):
+        """
+        递归翻开周围的格子
+        1. 如果是地雷格子，不递归
+        2. 如果当前格子已经翻开，不递归
+        3. 打开当前格子
+        4. 递归搜索其他格子（只搜索未翻开且非地雷的格子）
+        """
+
+        # 如果已经翻开，不递归
+        if mine.is_clicked:
+            return
+
+        # 打开当前格子
+        mine.on_mouse_left_down()
+
+        # 如果是地雷格子，不递归
+        # 如果当前格子周围地雷数量不为0，不递归
+        if mine.is_mine or mine.number != 0:
+            return
+
+        # 当前格子的行列
+        row = mine.row
+        col = mine.col
+
+        # 递归搜索其他格子
+        for dr, dc in self.config.offsets:
+            # 检查边界条件，确保不会访问到网格外的格子
+            new_row = row + dr
+            new_col = col + dc
+            if 0 <= new_row < self.config.grid_size and 0 <= new_col < self.config.grid_size:
+                # 获取相邻格子
+                adjacent_mine = self.state.mines[new_row][new_col]
+                # 如果相邻格子周围地雷数量为0，递归翻开
+                self._open_adjacent_mines(adjacent_mine)
+
+
 
 class Config:
     """游戏配置类，存储游戏的各种参数"""
@@ -141,9 +182,10 @@ class Config:
         # 地雷网格大小（行数和列数）
         self.mines_size = 25
         # 每个格子的像素大小
-        self.grid_size = 10
+        self.grid_size = 20
         # 地雷数量
-        self.mine_count = self.grid_size ** 2 // 3
+        self.mine_count = self.grid_size ** 2 // 6
+        # self.mine_count = 10
 
         # 游戏窗口宽度（网格大小 × 格子像素大小）
         self.width = self.mines_size * self.grid_size
@@ -153,6 +195,8 @@ class Config:
         self.fps = 60
         # 背景颜色（灰色）
         self.bg_color = (192, 192, 192)
+        # 八个方向
+        self.offsets = [(0, 1), (0, -1), (1, 0), (-1, 0), (1, 1), (-1, -1), (1, -1), (-1, 1)]
 
 
 class State:
@@ -163,8 +207,8 @@ class State:
         self.config = config
         # 创建地雷网格（二维列表），初始值为None
         # 用于存储每个格子的地雷对象
-        self.mines: list[list[Mine | None]] = [[None for _ in range(self.config.grid_size)] for _ in
-                                               range(self.config.grid_size)]
+        self.mines: list[list[Optional[Mine]]] = [[None for _ in range(self.config.grid_size)] for _ in
+                                                  range(self.config.grid_size)]
 
 
 class Mine(Sprite):
@@ -221,39 +265,39 @@ class Mine(Sprite):
             self.is_clicked = True
 
 
-    def on_mouse_right_down(self, pos):
+    def on_mouse_right_down(self, pos=(0, 0)):
         """处理鼠标右键点击事件"""
         # 检查鼠标是否点击在当前格子上
-        if self.rect.collidepoint(pos):
-            # 如果格子已经被点击，则不处理
-            if self.is_clicked:
-                return
-            # 切换标记状态（标记/取消标记）
-            self.mark = not self.mark
-            # 根据标记状态更新图像
-            if self.mark:
-                # 标记为旗子的图像
-                self.image = pygame.image.load("./image/10.gif")
-            else:
-                # 未标记的图像
-                self.image = pygame.image.load("./image/9.gif")
+        # if self.rect.collidepoint(pos):
+        # 如果格子已经被点击，则不处理
+        if self.is_clicked:
+            return
+        # 切换标记状态（标记/取消标记）
+        self.mark = not self.mark
+        # 根据标记状态更新图像
+        if self.mark:
+            # 标记为旗子的图像
+            self.image = pygame.image.load("./image/10.gif")
+        else:
+            # 未标记的图像
+            self.image = pygame.image.load("./image/9.gif")
 
-    def on_mouse_left_down(self, pos):
+    def on_mouse_left_down(self, pos=(0, 0)):
         """处理鼠标左键点击事件"""
 
         if self.is_clicked:
             return
 
         # 检查鼠标是否点击在当前格子上，且格子未被标记
-        if self.rect.collidepoint(pos) and self.mark is not True:
-            if self.is_mine:
-                # 显示地雷数量
-                self.image = pygame.image.load(f"./image/11.gif")
-            else:
-                # 更新为已点击的图像（数字0）
-                self.image = pygame.image.load("./image/0.jpg")
-            # 设置为已点击状态
-            self.is_clicked = True
+        # if self.rect.collidepoint(pos) and self.mark is not True:
+        if self.is_mine:
+            # 显示地雷数量
+            self.image = pygame.image.load(f"./image/11.gif")
+        else:
+            # 更新为已点击的图像（数字0）
+            self.image = pygame.image.load("./image/0.jpg")
+        # 设置为已点击状态
+        self.is_clicked = True
 
 
     def __repr__(self):
