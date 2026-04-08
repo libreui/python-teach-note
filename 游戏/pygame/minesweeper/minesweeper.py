@@ -37,10 +37,10 @@ class Minesweeper:
 
     def _init_mines(self):
         """初始化地雷网格，创建所有地雷格子对象"""
-        for i in range(self.config.grid_size):
-            for j in range(self.config.grid_size):
-                mine = Mine(self, i, j)
-                self.state.mines[i][j] = mine
+        for row in range(self.config.grid_size):
+            for col in range(self.config.grid_size):
+                mine = Mine(self, row, col)
+                self.state.mines[row][col] = mine
                 # 将所有地雷格子添加到精灵编组
                 self.mine_sprites.add(mine)
 
@@ -71,11 +71,11 @@ class Minesweeper:
         # 获取鼠标点击位置
         pos = event.pos
 
-        if not (0 <= pos[0] < self.config.width and 0 <= pos[1] < self.config.height):
-                return
+        if not (0 <= pos[0] < self.config.width and self.config.head_height <= pos[1] < self.config.height):
+            return
 
-        row = pos[0] // self.config.mines_size # x坐标对应的行索引
-        col = pos[1] // self.config.mines_size # y坐标对应的列索引
+        col = pos[0] // self.config.mines_size # x坐标对应的行索引
+        row = (pos[1] - self.config.head_height) // self.config.mines_size # y坐标对应的列索引
 
         # 当前被点击的格子
         clicked_mine: Mine = self.state.mines[row][col] # type: ignore
@@ -225,10 +225,13 @@ class Config:
         self.mine_count = self.grid_size ** 2 // 6
         # self.mine_count = 10
 
+        # 顶部头部高度
+        self.head_height = self.mines_size * 2
+
         # 游戏窗口宽度（网格大小 × 格子像素大小）
         self.width = self.mines_size * self.grid_size
         # 游戏窗口高度（网格大小 × 格子像素大小）
-        self.height = self.mines_size * self.grid_size
+        self.height = self.mines_size * self.grid_size + self.head_height
         # 游戏帧率
         self.fps = 60
         # 背景颜色（灰色）
@@ -263,18 +266,19 @@ class Mine(Sprite):
         if not cls.images_loaded:
             try:
                 cls.images = {
-                    "closed": pygame.image.load("./image/9.gif"),
-                    "mine": pygame.image.load("./image/11.gif"),
-                    "marked": pygame.image.load("./image/10.gif"),
-                    "0": pygame.image.load("./image/0.jpg"),
-                    "1": pygame.image.load("./image/1.gif"),
-                    "2": pygame.image.load("./image/2.gif"),
-                    "3": pygame.image.load("./image/3.gif"),
-                    "4": pygame.image.load("./image/4.gif"),
-                    "5": pygame.image.load("./image/5.gif"),
-                    "6": pygame.image.load("./image/6.gif"),
-                    "7": pygame.image.load("./image/7.gif"),
-                    "8": pygame.image.load("./image/8.gif"),
+                    "closed": pygame.image.load("./image/grid_unOpen.png"),
+                    "mine": pygame.image.load("./image/mine.png"),
+                    "mine_click": pygame.image.load("./image/mine_click.png"),
+                    "marked": pygame.image.load("./image/grid_flag.png"),
+                    "0": pygame.image.load("./image/grid0.png"),
+                    "1": pygame.image.load("./image/grid1.png"),
+                    "2": pygame.image.load("./image/grid2.png"),
+                    "3": pygame.image.load("./image/grid3.png"),
+                    "4": pygame.image.load("./image/grid4.png"),
+                    "5": pygame.image.load("./image/grid5.png"),
+                    "6": pygame.image.load("./image/grid6.png"),
+                    "7": pygame.image.load("./image/grid7.png"),
+                    "8": pygame.image.load("./image/grid8.png"),
                 }
                 cls.images_loaded = True
             except pygame.error as e:
@@ -294,9 +298,9 @@ class Mine(Sprite):
         self.col = col
 
         # 格子的行坐标（像素）
-        self.x = row * self.config.mines_size
+        self.x = col * self.config.mines_size
         # 格子的列坐标（像素）
-        self.y = col * self.config.mines_size
+        self.y = self._y()
         # 标记状态（是否被右键标记为地雷）
         self.is_marked = False
         # 点击状态（是否被翻开）
@@ -322,7 +326,7 @@ class Mine(Sprite):
         # 首先区分格子是否被翻开了
         if self.is_opened:
             if self.is_mine:
-                self.image = Mine.images["mine"]
+                self.image = Mine.images["mine_click"]
             elif self.number > 0:
                 self.image = Mine.images[str(self.number)]
             else:
@@ -336,6 +340,9 @@ class Mine(Sprite):
     #     """在屏幕上绘制地雷格子"""
     #     self._set_image()
     #     screen.blit(self.image, self.rect)
+
+    def _y(self):
+        return self.row * self.config.mines_size + self.config.head_height
 
 
     def set_mark(self):
