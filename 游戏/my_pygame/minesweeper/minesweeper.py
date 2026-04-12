@@ -22,9 +22,15 @@ class Minesweeper:
         self.screen = pygame.display.set_mode((self.config.width, self.config.height))
         # 创建游戏时钟（控制帧率）
         self.clock = pygame.time.Clock()
+        # 需要更新的区域列表
+        self.update_rects = []
 
         # 加载所有图像
         Mine.load_images()
+        Head.load_images()
+
+        # 创建头部模块
+        self.head = Head(self)
 
         # 创建精灵编组
         self.mine_sprites = pygame.sprite.Group()
@@ -92,6 +98,7 @@ class Minesweeper:
         self.mine_sprites.draw(self.screen)
         pygame.display.flip()
 
+
         while True:
             # 控制帧率
             if not self.changed_mines:
@@ -102,8 +109,16 @@ class Minesweeper:
             # 处理事件
             self._check_events()
 
+            # 绘制头部控件
+            if self.head.changed:
+                self.head.update()
+
             # 绘制所有地雷格子
             self._draw_mines()
+
+            # 更新屏幕
+            if self.update_rects:
+                pygame.display.update(self.update_rects)
 
             # 更新屏幕显示(移除，因为在_draw_mines中已经更新了)
             # pygame.display.flip()
@@ -113,7 +128,7 @@ class Minesweeper:
         if self.changed_mines:
 
             # 收集记录需要重绘的格子
-            update_rects  = [mine.rect for mine in self.changed_mines]
+            update_rects = [mine.rect for mine in self.changed_mines]
 
             # 绘制状态变化的格子
             for mine in self.changed_mines:
@@ -123,11 +138,15 @@ class Minesweeper:
                 self.screen.blit(mine.image, mine.rect)
 
             # 更新屏幕显示
-            pygame.display.update(update_rects)
+            # pygame.display.update(update_rects)
+            self.update_rects += update_rects
 
             # 清空状态变化的格子集合
             self.changed_mines.clear()
 
+    def _draw_status(self):
+        """绘制游戏状态信息"""
+        pass
 
     def _assign_mines(self):
         """给格子随机分配地雷"""
@@ -226,7 +245,7 @@ class Config:
         # self.mine_count = 10
 
         # 顶部头部高度
-        self.head_height = self.mines_size * 2
+        self.head_height = self.mines_size + 10
 
         # 游戏窗口宽度（网格大小 × 格子像素大小）
         self.width = self.mines_size * self.grid_size
@@ -377,9 +396,62 @@ class Mine(Sprite):
         return f"Mine({self.row}, {self.col})"
 
 
+class Head:
+    """头部游戏界面的头部信息"""
+    images = {}
+
+    images_loaded = False
+
+    def __init__(self, game):
+        """初始化头部信息"""
+        # 游戏对象
+        self.game = game
+        # 游戏窗口对象
+        self.screen = game.screen
+        # 游戏配置对象
+        self.config = game.config
+        # 设置更新标识
+        self.changed = True
+        # 头部区域
+        self.rect = pygame.Rect(0, 0, self.config.width, self.config.head_height)
+        # 笑脸位置
+        self.win_rect = pygame.Rect(0, 0, self.config.mines_size, self.config.mines_size)
+        self.win_rect.center = self.rect.center
+
+
+    @classmethod
+    def load_images(cls):
+        """加载头部图像"""
+        print("加载头部图像")
+        if not cls.images_loaded:
+            try:
+                cls.images = {
+                    'win': pygame.image.load("./image/win.png"),
+                    'lose': pygame.image.load("./image/lose.png"),
+                    'bg': pygame.image.load("./image/grid_unOpen.png"),
+                }
+                cls.images_loaded = True
+            except pygame.error as e:
+                print(f"加载图像失败: {e}")
+
+    def _draw_game_status_button(self):
+        """绘制游戏状态按钮"""
+        # 绘制游戏状态按钮
+        self.screen.blit(self.images['win'], self.win_rect)
+
+    def update(self):
+        # 绘制头部矩形
+        pygame.draw.rect(self.screen, self.config.bg_color, self.rect)
+        self._draw_game_status_button()
+        # pygame.display.update(self.rect)
+        self.game.update_rects.append(self.rect)
+        self.changed = False
+
+
+    def set_changed(self):
+        self.changed = True
+
+
 if __name__ == "__main__":
-    """程序入口点"""
-    # 创建扫雷游戏对象
-    minesweeper = Minesweeper()
-    # 运行游戏
-    minesweeper.run()
+    game = Minesweeper()
+    game.run()
