@@ -72,9 +72,10 @@ class Minesweeper:
                 # 如果游戏结束了，只有点击头部笑脸才能重新开始游戏
                 if not self.state.game_over:
                     self._check_mines_clicked(event)
-                else:
-                    # TODO 点击笑脸重新开始游戏
-                    pass
+
+                # 点击笑脸重新开始游戏
+                if self.head.on_clicked(event.pos):
+                    self.restart_game()
 
     def _check_game_over(self):
         """检查是否游戏结束"""
@@ -88,6 +89,10 @@ class Minesweeper:
         # 通知重绘区域
         self.head.set_changed()
         return
+
+
+    def restart_game(self):
+        """重新开始游戏"""
         # 重置游戏状态
         self.state.reset()
         # 初始化地雷网格
@@ -95,9 +100,9 @@ class Minesweeper:
         # 重新绘制所有格子
         self._init_draw()
         # 重置更新区域列表
-        self.update_rects = []
+        self.update_rects.clear()
         # 重置状态变化的格子
-        self.changed_mines = set()
+        self.changed_mines.clear()
 
     def _check_mines_clicked(self, event):
         """处理鼠标点击地雷格子的事件"""
@@ -145,13 +150,22 @@ class Minesweeper:
         # 更新屏幕
         if self.update_rects:
             pygame.display.update(self.update_rects)
+            self.update_rects.clear()
 
     def _open_all_mines(self):
         """打开所有地雷格子"""
         for row in self.state.mines:
             for mine in row:
-                if mine is not None:
-                    mine.set_opened()
+                if mine is not None and not mine.is_opened:
+                    mine.is_opened = True
+                    mine.set_image()
+                    # 绑定到屏幕
+                    mine.blit(self.screen)
+        # 通知重绘区域
+        rect = pygame.Rect(0, self.config.head_height,
+                           self.config.width,
+                           self.config.height - self.config.head_height)
+        self.update_rects.append(rect)
 
     def _fps_control(self):
         """控制游戏帧率"""
@@ -166,7 +180,7 @@ class Minesweeper:
         self._init_draw()
         while True:
             # 控制帧率
-            self._playing_draw()
+            self._fps_control()
             # 处理事件
             self._check_events()
             # 检查游戏是否结束
@@ -410,6 +424,11 @@ class Mine(Sprite):
         # 设置图像在屏幕上的位置
         self.rect.topleft = (self.x, self.y)
 
+    def blit(self, surface):
+        """在屏幕上绘制地雷格子"""
+        pygame.draw.rect(surface, self.config.bg_color, self.rect)
+        surface.blit(self.image, self.rect)
+
     def set_image(self):
         """根据当前状态设置图像"""
 
@@ -541,6 +560,13 @@ class Head:
 
     def set_changed(self):
         self.changed = True
+
+    def on_clicked(self, pos):
+        """检查是否点击了笑脸"""
+        if self.win_rect.collidepoint(pos):
+            self.set_changed()
+            return True
+        return False
 
 
 if __name__ == "__main__":
