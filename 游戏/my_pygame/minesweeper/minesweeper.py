@@ -41,6 +41,7 @@ class Minesweeper:
         # 初始化地雷网格
         self._init_mines()
 
+
     def _init_mines(self):
         """初始化地雷网格，创建所有地雷格子对象"""
         for row in range(self.config.grid_size):
@@ -68,9 +69,35 @@ class Minesweeper:
                 sys.exit()
             # 处理鼠标点击事件
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                self._check_mines_clicked(event)
+                # 如果游戏结束了，只有点击头部笑脸才能重新开始游戏
+                if not self.state.game_over:
+                    self._check_mines_clicked(event)
+                else:
+                    # TODO 点击笑脸重新开始游戏
+                    pass
 
+    def _check_game_over(self):
+        """检查是否游戏结束"""
+        if self.state.game_over:
+            self.set_game_over()
 
+    def set_game_over(self):
+        """游戏结束后的回调函数"""
+        # 打开所有地雷格子
+        self._open_all_mines()
+        # 通知重绘区域
+        self.head.set_changed()
+        return
+        # 重置游戏状态
+        self.state.reset()
+        # 初始化地雷网格
+        self._init_mines()
+        # 重新绘制所有格子
+        self._init_draw()
+        # 重置更新区域列表
+        self.update_rects = []
+        # 重置状态变化的格子
+        self.changed_mines = set()
 
     def _check_mines_clicked(self, event):
         """处理鼠标点击地雷格子的事件"""
@@ -86,42 +113,67 @@ class Minesweeper:
         # 当前被点击的格子
         clicked_mine: Mine = self.state.mines[row][col] # type: ignore
 
+        # 如果点击了地雷，游戏结束
+        if clicked_mine.is_mine:
+            # 设置因为点了这个格子游戏结束了
+            clicked_mine.is_game_over = True
+            self.state.set_game_over()
+            return
+
         if event.button == 1: # 左键
             self._open_mines(clicked_mine)
         elif event.button == 3: # 右键
             clicked_mine.set_mark()
 
-    def run(self):
-        """游戏主循环"""
+    def _init_draw(self):
+
         # 首次绘制所有格子
         self.screen.fill(self.config.bg_color)
         self.mine_sprites.draw(self.screen)
         pygame.display.flip()
 
+    def _playing_draw(self):
+        """绘制游戏进行中的内容"""
+        # 绘制头部控件
+        if self.head.changed:
+            self.head.update()
 
+        # 绘制所有地雷格子
+        # TODO 游戏结束后绘制有新能问题
+        self._draw_mines()
+
+        # 更新屏幕
+        if self.update_rects:
+            pygame.display.update(self.update_rects)
+
+    def _open_all_mines(self):
+        """打开所有地雷格子"""
+        for row in self.state.mines:
+            for mine in row:
+                if mine is not None:
+                    mine.set_opened()
+
+    def _fps_control(self):
+        """控制游戏帧率"""
+        if not self.changed_mines:
+            self.clock.tick(10)
+        else:
+            self.clock.tick(self.config.fps)
+
+    def run(self):
+        """游戏主循环"""
+        # 绘制初始内容
+        self._init_draw()
         while True:
             # 控制帧率
-            if not self.changed_mines:
-                self.clock.tick(10)
-            else:
-                self.clock.tick(self.config.fps)
-
+            self._playing_draw()
             # 处理事件
             self._check_events()
+            # 检查游戏是否结束
+            self._check_game_over()
+            # 绘制游戏进行中的内容
+            self._playing_draw()
 
-            # 绘制头部控件
-            if self.head.changed:
-                self.head.update()
-
-            # 绘制所有地雷格子
-            self._draw_mines()
-
-            # 更新屏幕
-            if self.update_rects:
-                pygame.display.update(self.update_rects)
-
-            # 更新屏幕显示(移除，因为在_draw_mines中已经更新了)
-            # pygame.display.flip()
 
     def _draw_mines(self):
         """绘制所有地雷格子"""
@@ -265,12 +317,29 @@ class State:
     def __init__(self, config):
         """初始化游戏状态"""
         self.config = config
+        # 游戏是否结束，初始值为False，表示游戏进行中
+        self.game_over = False
         # 创建地雷网格（二维列表），初始值为None
         # 用于存储每个格子的地雷对象
         self.mines: list[list[Mine]] = []
+
+        # 初始化地雷网格
+        self._init_mines()
+
+    def _init_mines(self):
+        """初始化地雷网格"""
         for _ in range(self.config.grid_size):
             # noinspection PyTypeChecker
             self.mines.append([None for _ in range(self.config.grid_size)])
+
+    def reset(self):
+        """重置游戏状态"""
+        self.game_over = False
+        self._init_mines()
+
+    def set_game_over(self):
+        """设置游戏结束"""
+        self.game_over = True
 
 
 class Mine(Sprite):
@@ -328,6 +397,8 @@ class Mine(Sprite):
         self.is_mine = False
         # 格子的数字（0-8）
         self.number = 0
+        # 是这个格子被点击后游戏使得游戏结束的标志
+        self.is_game_over = False
 
         # 预加载所有图像
         Mine.load_images()
@@ -339,13 +410,16 @@ class Mine(Sprite):
         # 设置图像在屏幕上的位置
         self.rect.topleft = (self.x, self.y)
 
-    def _set_image(self):
+    def set_image(self):
         """根据当前状态设置图像"""
 
         # 首先区分格子是否被翻开了
         if self.is_opened:
             if self.is_mine:
-                self.image = Mine.images["mine_click"]
+                if self.is_game_over:
+                    self.image = Mine.images["mine_click"]
+                else:
+                    self.image = Mine.images["mine"]
             elif self.number > 0:
                 self.image = Mine.images[str(self.number)]
             else:
@@ -372,7 +446,7 @@ class Mine(Sprite):
         self.is_marked = not self.is_marked
 
         # 更新图像
-        self._set_image()
+        self.set_image()
 
         # 记录状态变化的格子
         self.game.changed_mines.add(self)
@@ -384,16 +458,17 @@ class Mine(Sprite):
             return
 
         self.is_opened = True
-
         # 更新图像
-        self._set_image()
+        self.set_image()
 
         # 记录状态变化的格子
         self.game.changed_mines.add(self)
 
-
     def __repr__(self):
         return f"Mine({self.row}, {self.col})"
+
+    def reset(self):
+        pass
 
 
 class Head:
@@ -410,6 +485,8 @@ class Head:
         self.screen = game.screen
         # 游戏配置对象
         self.config = game.config
+        # 游戏状态
+        self.state = game.state
         # 设置更新标识
         self.changed = True
         # 头部区域
@@ -417,6 +494,11 @@ class Head:
         # 笑脸位置
         self.win_rect = pygame.Rect(0, 0, self.config.mines_size, self.config.mines_size)
         self.win_rect.center = self.rect.center
+
+        # 加载头部图像
+        self.load_images()
+
+        self.image = Head.images['win']
 
 
     @classmethod
@@ -436,8 +518,17 @@ class Head:
 
     def _draw_game_status_button(self):
         """绘制游戏状态按钮"""
+        # 设置图像
+        self.set_image()
         # 绘制游戏状态按钮
-        self.screen.blit(self.images['win'], self.win_rect)
+        self.screen.blit(self.image, self.win_rect)
+
+    def set_image(self):
+        """根据当前状态设置图像"""
+        if self.state.game_over:
+            self.image = Head.images["lose"]
+        else:
+            self.image = Head.images["win"]
 
     def update(self):
         # 绘制头部矩形
