@@ -149,8 +149,7 @@ class Game:
             # 计算球拍的加速度
             self.paddle_acceleration = (self.paddle_left.rect.centery - current_y) / 10
             self.paddle_acceleration = round(self.paddle_acceleration-int(self.paddle_acceleration), 1)
-            print(self.paddle_acceleration)
-            self.clock.tick(30)
+            self.clock.tick(60)
 
     def _update_screen(self):
         self.screen.fill((0, 0, 0))
