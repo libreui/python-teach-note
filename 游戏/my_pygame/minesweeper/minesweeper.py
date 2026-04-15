@@ -118,17 +118,20 @@ class Minesweeper:
         # 当前被点击的格子
         clicked_mine: Mine = self.state.mines[row][col] # type: ignore
 
-        # 如果点击了地雷，游戏结束
-        if clicked_mine.is_mine:
-            # 设置因为点了这个格子游戏结束了
-            clicked_mine.is_game_over = True
-            self.state.set_game_over()
-            return
-
+        # 检查是左键还是右键点击
         if event.button == 1: # 左键
+            # 如果点击了地雷，游戏结束
+            if clicked_mine.is_mine:
+                # 设置因为点了这个格子游戏结束了
+                clicked_mine.is_game_over = True
+                self.state.set_game_over()
+                return
+            # 非地雷格子，打开
             self._open_mines(clicked_mine)
         elif event.button == 3: # 右键
+            # 无论是地雷还是非地雷格子，都可以标记
             clicked_mine.set_mark()
+            self.head.set_changed()
 
     def _init_draw(self):
 
@@ -306,6 +309,9 @@ class Config:
         self.mines_size = 25
         # 每个格子的像素大小
         self.grid_size = 20
+        # 数字图片大小
+        self.digit_w = 13
+        self.digit_h = 23
         # 地雷数量
         self.mine_count = self.grid_size ** 2 // 6
         # self.mine_count = 10
@@ -333,6 +339,12 @@ class State:
         self.config = config
         # 游戏是否结束，初始值为False，表示游戏进行中
         self.game_over = False
+        # 记录被标记的地雷数量
+        self._marked_mines = 0
+        # 记录当前剩余地雷数量
+        self._remaining_mines = 0
+
+
         # 创建地雷网格（二维列表），初始值为None
         # 用于存储每个格子的地雷对象
         self.mines: list[list[Mine]] = []
@@ -346,8 +358,27 @@ class State:
             # noinspection PyTypeChecker
             self.mines.append([None for _ in range(self.config.grid_size)])
 
+    #
+    @property
+    def remaining_mines(self):
+        """当前剩余地雷数量"""
+        return self.config.mine_count - self._marked_mines
+
+    def set_marked_mines(self, marked:bool):
+        """增加被标记的地雷数量"""
+        if marked:
+            self._marked_mines += 1
+        else:
+            self._marked_mines -= 1
+
+    def minus_remaining_mines(self):
+        """减少当前剩余地雷数量"""
+        self._remaining_mines -= 1
+
+
     def reset(self):
         """重置游戏状态"""
+        
         self.game_over = False
         self._init_mines()
 
@@ -391,6 +422,8 @@ class Mine(Sprite):
         super().__init__()
         # 游戏对象
         self.game = game
+        # 游戏状态对象
+        self.state = game.state
         # 游戏窗口对象
         self.screen = game.screen
         # 游戏配置对象
@@ -464,6 +497,9 @@ class Mine(Sprite):
 
         self.is_marked = not self.is_marked
 
+        # 更新游戏状态
+        self.state.set_marked_mines(self.is_marked)
+
         # 更新图像
         self.set_image()
 
@@ -496,16 +532,16 @@ class Head:
 
     images_loaded = False
 
-    def __init__(self, game):
+    def __init__(self, minesweeper):
         """初始化头部信息"""
         # 游戏对象
-        self.game = game
+        self.game = minesweeper
         # 游戏窗口对象
-        self.screen = game.screen
+        self.screen = minesweeper.screen
         # 游戏配置对象
-        self.config = game.config
+        self.config = minesweeper.config
         # 游戏状态
-        self.state = game.state
+        self.state = minesweeper.state
         # 设置更新标识
         self.changed = True
         # 头部区域
@@ -513,6 +549,15 @@ class Head:
         # 笑脸位置
         self.win_rect = pygame.Rect(0, 0, self.config.mines_size, self.config.mines_size)
         self.win_rect.center = self.rect.center
+
+        # 地雷数量区域
+        self.mine_digit_rects = []
+        for i in range(3):
+            rect = pygame.Rect(10 + self.config.digit_w * i,
+                               (self.config.head_height - self.config.digit_h) // 2,
+                               self.config.mines_size,
+                               self.config.mines_size)
+            self.mine_digit_rects.append(rect)
 
         # 加载头部图像
         self.load_images()
@@ -530,6 +575,16 @@ class Head:
                     'win': pygame.image.load("./image/win.png"),
                     'lose': pygame.image.load("./image/lose.png"),
                     'bg': pygame.image.load("./image/grid_unOpen.png"),
+                    '0': pygame.image.load("./image/number0.png"),
+                    '1': pygame.image.load("./image/number1.png"),
+                    '2': pygame.image.load("./image/number2.png"),
+                    '3': pygame.image.load("./image/number3.png"),
+                    '4': pygame.image.load("./image/number4.png"),
+                    '5': pygame.image.load("./image/number5.png"),
+                    '6': pygame.image.load("./image/number6.png"),
+                    '7': pygame.image.load("./image/number7.png"),
+                    '8': pygame.image.load("./image/number8.png"),
+                    '9': pygame.image.load("./image/number9.png"),
                 }
                 cls.images_loaded = True
             except pygame.error as e:
@@ -542,6 +597,13 @@ class Head:
         # 绘制游戏状态按钮
         self.screen.blit(self.image, self.win_rect)
 
+    def _draw_mine_count(self):
+        """绘制地雷数量区域"""
+        # 转换为3位数
+        remaining_mines = f"{self.state.remaining_mines:03d}"
+        for i, digit in enumerate(remaining_mines):
+            self.screen.blit(Head.images[digit], self.mine_digit_rects[i])
+
     def set_image(self):
         """根据当前状态设置图像"""
         if self.state.game_over:
@@ -553,6 +615,7 @@ class Head:
         # 绘制头部矩形
         pygame.draw.rect(self.screen, self.config.bg_color, self.rect)
         self._draw_game_status_button()
+        self._draw_mine_count()
         # pygame.display.update(self.rect)
         self.game.update_rects.append(self.rect)
         self.changed = False
