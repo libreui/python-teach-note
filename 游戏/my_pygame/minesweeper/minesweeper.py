@@ -1,8 +1,10 @@
 import random
 import sys
+from time import sleep
+
 import pygame
 from pygame.sprite import Sprite
-from typing import List, Set, Optional, Dict
+from typing import Dict
 
 
 class ResourceManager:
@@ -198,6 +200,11 @@ class Minesweeper:
             clicked_mine.set_mark()
             self.head.set_changed()
 
+        # 记录第一次点击格子时间
+        if not self.state.game_started:
+            self.state.game_started = True
+            self.state.start_time = pygame.time.get_ticks() // 1000
+
     def _init_draw(self):
 
         # 首次绘制所有格子
@@ -208,11 +215,9 @@ class Minesweeper:
     def _playing_draw(self):
         """绘制游戏进行中的内容"""
         # 绘制头部控件
-        if self.head.changed:
-            self.head.update()
+        self.head.update()
 
         # 绘制所有地雷格子
-        # TODO 游戏结束后绘制有新能问题
         self._draw_mines()
 
         # 更新屏幕
@@ -405,6 +410,12 @@ class State:
         self._marked_mines = 0
         # 记录当前剩余地雷数量
         self._remaining_mines = 0
+        # 倒计时开始时的时间
+        self._timer_start_time = 0
+        # 游戏开始时间
+        self.start_time = 0
+        # 游戏是否开始
+        self.game_started = False
 
         # 创建地雷网格（二维列表），初始值为None
         # 用于存储每个格子的地雷对象
@@ -419,7 +430,11 @@ class State:
             # noinspection PyTypeChecker
             self.mines.append([None for _ in range(self.config.grid_size)])
 
-    #
+    @property
+    def timer_start_time(self):
+        """倒计时开始时的时间"""
+        return self.config.mine_count * 5
+
     @property
     def remaining_mines(self):
         """当前剩余地雷数量"""
@@ -440,6 +455,11 @@ class State:
         """重置游戏状态"""
 
         self.game_over = False
+        self._marked_mines = 0
+        self._remaining_mines = 0
+        self._timer = 0
+        self.start_time = 0
+        self.game_started = False
         self._init_mines()
 
     def set_game_over(self):
@@ -450,17 +470,17 @@ class State:
 class Mine(Sprite):
     """地雷格子类，继承自Sprite，负责单个地雷格子的显示和交互"""
 
-    def __init__(self, game, row, col):
+    def __init__(self, minesweeper, row, col):
         """初始化地雷格子"""
         super().__init__()
         # 游戏对象
-        self.game = game
+        self.game = minesweeper
         # 游戏状态对象
-        self.state = game.state
+        self.state = minesweeper.state
         # 游戏窗口对象
-        self.screen = game.screen
+        self.screen = minesweeper.screen
         # 游戏配置对象
-        self.config = game.config
+        self.config = minesweeper.config
         # 行列
         self.row = row
         self.col = col
@@ -553,9 +573,6 @@ class Mine(Sprite):
     def __repr__(self):
         return f"Mine({self.row}, {self.col})"
 
-    def reset(self):
-        pass
-
 
 class Head:
     """头部游戏界面的头部信息"""
@@ -587,6 +604,15 @@ class Head:
                                self.config.mines_size)
             self.mine_digit_rects.append(rect)
 
+        # 倒计时区域
+        self.timer_digit_rects = []
+        for i in range(3, 0, -1):
+            self.timer_rect = pygame.Rect((self.config.width - self.config.digit_w * (i + 1)) - 10,
+                                          (self.config.head_height - self.config.digit_h) // 2,
+                                          self.config.digit_w,
+                                          self.config.digit_h)
+            self.timer_digit_rects.append(self.timer_rect)
+
         # 获取头部资源
         self.images = self.game.resource_manager.get_head_images()
         # 初始图像
@@ -607,6 +633,18 @@ class Head:
             if digit in self.images:
                 self.screen.blit(self.images[digit], self.mine_digit_rects[i])
 
+    def _draw_timer(self):
+        """绘制倒计时区域"""
+        elapsed_time = 0
+        if self.state.game_started and not self.state.game_over:
+            current_time = pygame.time.get_ticks() // 1000
+            elapsed_time = self.state.timer_start_time - (current_time - self.state.start_time)
+        # 转换为3位数
+        timer = f"{elapsed_time:03d}"
+        for i, digit in enumerate(timer):
+            if digit in self.images:
+                self.screen.blit(self.images[digit], self.timer_digit_rects[i])
+
     def set_image(self):
         """根据当前状态设置图像"""
         if self.state.game_over:
@@ -619,6 +657,7 @@ class Head:
         pygame.draw.rect(self.screen, self.config.bg_color, self.rect)
         self._draw_game_status_button()
         self._draw_mine_count()
+        self._draw_timer()
         # pygame.display.update(self.rect)
         self.game.update_rects.append(self.rect)
         self.changed = False
