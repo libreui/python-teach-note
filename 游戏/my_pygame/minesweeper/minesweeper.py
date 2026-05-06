@@ -20,38 +20,44 @@ class ResourceManager:
         """加载所有游戏图片资源"""
         if not self.images_loaded:
             try:
+                import os
+                # 获取当前脚本所在目录的绝对路径
+                script_dir = os.path.dirname(os.path.abspath(__file__))
+                # 构建图片目录的绝对路径
+                image_dir = os.path.join(script_dir, "image")
+                
                 # 加载地雷格子相关图片
                 self.mine_images = {
-                    "closed": pygame.image.load("./image/grid_unOpen.png"),
-                    "mine": pygame.image.load("./image/mine.png"),
-                    "mine_click": pygame.image.load("./image/mine_click.png"),
-                    "marked": pygame.image.load("./image/grid_flag.png"),
-                    "0": pygame.image.load("./image/grid0.png"),
-                    "1": pygame.image.load("./image/grid1.png"),
-                    "2": pygame.image.load("./image/grid2.png"),
-                    "3": pygame.image.load("./image/grid3.png"),
-                    "4": pygame.image.load("./image/grid4.png"),
-                    "5": pygame.image.load("./image/grid5.png"),
-                    "6": pygame.image.load("./image/grid6.png"),
-                    "7": pygame.image.load("./image/grid7.png"),
-                    "8": pygame.image.load("./image/grid8.png"),
+                    "closed": pygame.image.load(os.path.join(image_dir, "grid_unOpen.png")),
+                    "mine": pygame.image.load(os.path.join(image_dir, "mine.png")),
+                    "mine_click": pygame.image.load(os.path.join(image_dir, "mine_click.png")),
+                    "marked": pygame.image.load(os.path.join(image_dir, "grid_flag.png")),
+                    "0": pygame.image.load(os.path.join(image_dir, "grid0.png")),
+                    "1": pygame.image.load(os.path.join(image_dir, "grid1.png")),
+                    "2": pygame.image.load(os.path.join(image_dir, "grid2.png")),
+                    "3": pygame.image.load(os.path.join(image_dir, "grid3.png")),
+                    "4": pygame.image.load(os.path.join(image_dir, "grid4.png")),
+                    "5": pygame.image.load(os.path.join(image_dir, "grid5.png")),
+                    "6": pygame.image.load(os.path.join(image_dir, "grid6.png")),
+                    "7": pygame.image.load(os.path.join(image_dir, "grid7.png")),
+                    "8": pygame.image.load(os.path.join(image_dir, "grid8.png")),
                 }
 
                 # 加载头部相关图片
                 self.head_images = {
-                    "win": pygame.image.load("./image/win.png"),
-                    "lose": pygame.image.load("./image/lose.png"),
-                    "bg": pygame.image.load("./image/grid_unOpen.png"),
-                    "0": pygame.image.load("./image/number0.png"),
-                    "1": pygame.image.load("./image/number1.png"),
-                    "2": pygame.image.load("./image/number2.png"),
-                    "3": pygame.image.load("./image/number3.png"),
-                    "4": pygame.image.load("./image/number4.png"),
-                    "5": pygame.image.load("./image/number5.png"),
-                    "6": pygame.image.load("./image/number6.png"),
-                    "7": pygame.image.load("./image/number7.png"),
-                    "8": pygame.image.load("./image/number8.png"),
-                    "9": pygame.image.load("./image/number9.png"),
+                    "win": pygame.image.load(os.path.join(image_dir, "win.png")),
+                    "lose": pygame.image.load(os.path.join(image_dir, "lose.png")),
+                    "bg": pygame.image.load(os.path.join(image_dir, "grid_unOpen.png")),
+                    "0": pygame.image.load(os.path.join(image_dir, "number0.png")),
+                    "1": pygame.image.load(os.path.join(image_dir, "number1.png")),
+                    "2": pygame.image.load(os.path.join(image_dir, "number2.png")),
+                    "3": pygame.image.load(os.path.join(image_dir, "number3.png")),
+                    "4": pygame.image.load(os.path.join(image_dir, "number4.png")),
+                    "5": pygame.image.load(os.path.join(image_dir, "number5.png")),
+                    "6": pygame.image.load(os.path.join(image_dir, "number6.png")),
+                    "7": pygame.image.load(os.path.join(image_dir, "number7.png")),
+                    "8": pygame.image.load(os.path.join(image_dir, "number8.png")),
+                    "9": pygame.image.load(os.path.join(image_dir, "number9.png")),
                 }
 
                 self.images_loaded = True
@@ -147,8 +153,70 @@ class Minesweeper:
 
     def _check_game_over(self):
         """检查是否游戏结束"""
+        self._check_all_mines()
         if self.state.game_over:
             self.set_game_over()
+
+    def _on_click_opened_grid(self, mine):
+        """处理点击已打开的格子事件 - 让周围格子同时闪烁"""
+        # 收集需要闪烁的格子
+        shining_mines = []
+        row_range = range(mine.row - 1, mine.row + 2)
+        col_range = range(mine.col - 1, mine.col + 2)
+
+        for row in row_range:
+            for col in col_range:
+                if (0 <= row < self.config.grid_size
+                        and 0 <= col < self.config.grid_size):
+                    _mine = self.state.mines[row][col]
+                    if not _mine.is_opened and not _mine.is_marked:
+                        shining_mines.append(_mine)
+
+        # 同时闪烁所有格子
+        self._shining_simultaneously(shining_mines)
+
+    def _shining_simultaneously(self, mines):
+        """让多个格子同时闪烁"""
+        # 保存所有格子的原图像
+        original_images = [mine.image for mine in mines]
+        
+        # 同时设置为空白图像
+        for mine in mines:
+            mine.image = mine.images["0"]
+            mine.blit(self.screen)
+        
+        # 一次性刷新所有闪烁区域
+        rects = [mine.rect for mine in mines]
+        pygame.display.update(rects)
+        
+        # 等待短暂时间
+        pygame.time.wait(100)
+        
+        # 同时恢复原图像
+        for mine, original_image in zip(mines, original_images):
+            mine.image = original_image
+            mine.blit(self.screen)
+        
+        # 再次刷新所有区域
+        pygame.display.update(rects)
+
+    def _check_all_mines(self):
+        """检查是否所有地雷"""
+        # 当标记完最后一个地雷，游戏结束
+        # 检查所有未打开的格子，如果是地雷，游戏结束
+        if self.state.remaining_mines > 0:
+            return None
+
+        for row in self.state.mines:
+            for mine in row:
+                # 如果是地雷，且未标记，游戏结束
+                if mine is not None and mine.is_mine and not mine.is_marked:
+                    self.state.set_game_over()
+                    return True
+        else:
+            self.state.set_game_over()
+            return True
+        return None
 
     def set_game_over(self):
         """游戏结束后的回调函数"""
@@ -193,8 +261,14 @@ class Minesweeper:
                 clicked_mine.is_game_over = True
                 self.state.set_game_over()
                 return
-            # 非地雷格子，打开
-            self._open_mines(clicked_mine)
+
+            # 如果当前格子已经被翻开
+            if clicked_mine.is_opened:
+                # 闪烁周围八个格子
+                self._on_click_opened_grid(clicked_mine)
+            else:
+                # 非地雷格子，打开
+                self._open_mines(clicked_mine)
         elif event.button == 3:  # 右键
             # 无论是地雷还是非地雷格子，都可以标记
             clicked_mine.set_mark()
@@ -380,7 +454,8 @@ class Config:
         self.digit_w = 13
         self.digit_h = 23
         # 地雷数量
-        self.mine_count = self.grid_size ** 2 // 6
+        # self.mine_count = self.grid_size ** 2 // 6
+        self.mine_count = 5
         # self.mine_count = 10
 
         # 顶部头部高度
@@ -648,9 +723,36 @@ class Head:
     def set_image(self):
         """根据当前状态设置图像"""
         if self.state.game_over:
-            self.image = self.images["lose"]
+            # 游戏结束时，检查是否真正胜利
+            if self._is_game_won():
+                self.image = self.images["win"]  # 胜利，显示笑脸
+            else:
+                self.image = self.images["lose"]  # 失败，显示哭脸
         else:
             self.image = self.images["win"]
+
+    def _is_game_won(self):
+        """判断游戏是否真正胜利"""
+        # 遍历所有格子检查胜利条件
+        for row in range(self.config.grid_size):
+            for col in range(self.config.grid_size):
+                mine = self.state.mines[row][col]
+                if mine is None:
+                    continue
+                
+                # 条件1：所有地雷都必须被正确标记
+                if mine.is_mine and not mine.is_marked:
+                    return False
+                
+                # 条件2：所有被标记的必须是地雷（不能有误标）
+                if mine.is_marked and not mine.is_mine:
+                    return False
+                
+                # 条件3：所有非地雷格子都必须被翻开
+                if not mine.is_mine and not mine.is_opened:
+                    return False
+        
+        return True
 
     def update(self):
         # 绘制头部矩形
