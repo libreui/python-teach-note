@@ -97,7 +97,7 @@ while running:
     player.update_bullets()
     
     for bullet in player.bullets:
-        bullet.draw()
+        bullet.update()
     
     pygame.display.update()
     clock.tick(60)

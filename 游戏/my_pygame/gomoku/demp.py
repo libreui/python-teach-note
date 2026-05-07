@@ -55,23 +55,23 @@ def drawWin():
     win.setBackground('yellow')
     for i in range(0, 451, 30):
         line = Line(Point(i, 0), Point(i, 450))
-        line.draw(win)
+        line.update(win)
     for j in range(0, 451, 30):
         line = Line(Point(0, j), Point(450, j))
-        line.draw(win)
-    Rectangle(Point(460, 5), Point(540, 35)).draw(win)
-    Rectangle(Point(460, 45), Point(540, 75)).draw(win)
-    Rectangle(Point(460, 85), Point(540, 115)).draw(win)
-    Rectangle(Point(460, 125), Point(540, 155)).draw(win)
-    Rectangle(Point(452, 275), Point(548, 305)).draw(win)
-    Rectangle(Point(452, 307), Point(548, 395)).draw(win)
-    aiFirst.draw(win)
-    manFirst.draw(win)
-    notice.draw(win)
-    last_ai.draw(win)
-    last_man.draw(win)
-    QUIT.draw(win)
-    RESTART.draw(win)
+        line.update(win)
+    Rectangle(Point(460, 5), Point(540, 35)).update(win)
+    Rectangle(Point(460, 45), Point(540, 75)).update(win)
+    Rectangle(Point(460, 85), Point(540, 115)).update(win)
+    Rectangle(Point(460, 125), Point(540, 155)).update(win)
+    Rectangle(Point(452, 275), Point(548, 305)).update(win)
+    Rectangle(Point(452, 307), Point(548, 395)).update(win)
+    aiFirst.update(win)
+    manFirst.update(win)
+    notice.update(win)
+    last_ai.update(win)
+    last_man.update(win)
+    QUIT.update(win)
+    RESTART.update(win)
 
 
 #判断该点是否在棋盘范围内
@@ -357,7 +357,7 @@ def go(x, y):
             c.setFill('white')
         else:
             c.setFill('black')
-    c.draw(win)
+    c.update(win)
     list.append(c)
     if (ban(x, y)):
         if (start == ai):

@@ -103,7 +103,7 @@ class PlaneGame(object):
         self.hero_group.draw(self.screen)
         # 子弹精灵组更新
         self.hero.bullets.update()
-        self.hero.bullets.draw(self.screen)
+        self.hero.bullets.update(self.screen)
  
     @staticmethod
     def __game_over():

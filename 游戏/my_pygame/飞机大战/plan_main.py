@@ -56,7 +56,7 @@ class PlanGame(object):
 
         # 子弹精灵族更新
         self.hero.bullets.update()
-        self.hero.bullets.draw(self.screen)
+        self.hero.bullets.update(self.screen)
 
 
     def __event_handler(self):

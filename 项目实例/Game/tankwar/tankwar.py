@@ -115,7 +115,7 @@ class TankWar:
 
     def _update_map_elements(self):
         for ele, group in self.elements.get_elements().items():
-            group.draw(self.screen)
+            group.update(self.screen)
 
     def _check_collied_elements(self):
         """检测碰撞地图中元素"""

@@ -127,7 +127,7 @@ class Tetris:
         self.__draw_grids()
         self.__draw_matrix()
         if self.cube is not None:
-            self.cube.draw()
+            self.cube.update()
         self.__show_welcome()
         self.__show_score()
         pygame.display.update()
