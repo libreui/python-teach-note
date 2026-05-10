@@ -6,6 +6,7 @@ from bird import Bird
 from ground import Ground
 from state import State
 from ready import Ready
+from pipe import PipeGroup
 
 
 class Flappy:
@@ -29,6 +30,9 @@ class Flappy:
 
         self.bird = Bird(50, 150)
         self.ready = Ready(self)
+
+        # 测试管道
+        self.pip_group = PipeGroup(self)
 
     def _reset(self):
         """重置游戏状态"""
@@ -62,13 +66,16 @@ class Flappy:
                 self.state.game_over = True
             else:
                 self.bird.update()
+                self.pip_group.update()
 
     def _display(self):
         """显示游戏窗口"""
         self.screen.fill(self.config.BG_COLOR)
         self.background.draw() # 更新背景
+        self.pip_group.draw(self.screen) # 更新管道
         self.ground.draw() # 更新地面
         self.bird.draw(self.screen)
+
         # 游戏未开始时，显示准备信息
         if not self.state.game_started:
             self.ready.draw(self.screen)
