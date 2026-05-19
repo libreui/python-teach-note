@@ -4,7 +4,7 @@ import pygame
 class Config:
     WIDTH = 288  # 游戏窗口宽度
     HEIGHT = 512  # 游戏窗口高度
-    TITLE = 'Flappy Game'  # 游戏窗口标题
+    TITLE = 'Flappy Bird'  # 游戏窗口标题
     FPS = 60
     GRAVITY = 0.3  # 重力加速度
     SPEED = 1  # 基础速度
@@ -25,6 +25,6 @@ class Config:
     PIPE_COLOR = 'green'  # 管道颜色 green red
     PIPE_WIDTH = 52  # 管道宽度
     PIPE_HEIGHT = 320  # 管道高度
-    PIPE_GAP = 100  # 管道间距
+    PIPE_GAP = 120  # 管道间距
     PIPE_SPACING = 150  # 管道间距
 

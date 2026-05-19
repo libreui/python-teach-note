@@ -9,6 +9,8 @@ class ResourceManager:
     def __init__(self):
         """初始化资源管理器"""
         # 背景图片资源
+
+        self.icon = None
         self.background_images: Dict[str, pygame.Surface] = {}
         # 小鸟图片资源
         self.bird_images: Dict[str, pygame.Surface] = {}
@@ -16,6 +18,8 @@ class ResourceManager:
         self.pipe_images: Dict[str, pygame.Surface] = {}
         # 其他图片资源
         self.other_images: Dict[str, pygame.Surface] = {}
+        # 分数图片资源
+        self.score_images: Dict[str, pygame.Surface] = {}
         # 资源加载标志
         self.images_loaded = False
 
@@ -60,6 +64,23 @@ class ResourceManager:
                     "message": pygame.image.load(os.path.join(sprites_dir, "message.png")).convert_alpha(),
                 }
 
+                # 加载分数图片
+                self.score_images = {
+                    "0": pygame.image.load(os.path.join(sprites_dir, "0.png")).convert_alpha(),
+                    "1": pygame.image.load(os.path.join(sprites_dir, "1.png")).convert_alpha(),
+                    "2": pygame.image.load(os.path.join(sprites_dir, "2.png")).convert_alpha(),
+                    "3": pygame.image.load(os.path.join(sprites_dir, "3.png")).convert_alpha(),
+                    "4": pygame.image.load(os.path.join(sprites_dir, "4.png")).convert_alpha(),
+                    "5": pygame.image.load(os.path.join(sprites_dir, "5.png")).convert_alpha(),
+                    "6": pygame.image.load(os.path.join(sprites_dir, "6.png")).convert_alpha(),
+                    "7": pygame.image.load(os.path.join(sprites_dir, "7.png")).convert_alpha(),
+                    "8": pygame.image.load(os.path.join(sprites_dir, "8.png")).convert_alpha(),
+                    "9": pygame.image.load(os.path.join(sprites_dir, "9.png")).convert_alpha(),
+                }
+
+                # 加载图标
+                self.icon = pygame.image.load(os.path.join(sprites_dir, "../favicon.ico")).convert_alpha()
+
                 self.images_loaded = True
                 print("资源加载成功")
             except pygame.error as e:
@@ -88,3 +109,15 @@ class ResourceManager:
         if not self.images_loaded:
             self.load_images()
         return self.other_images
+
+    def get_score_images(self) -> Dict[str, pygame.Surface]:
+        """获取分数图片资源"""
+        if not self.images_loaded:
+            self.load_images()
+        return self.score_images
+
+    def get_icon(self) -> pygame.Surface:
+        """获取游戏图标"""
+        if not self.images_loaded:
+            self.load_images()
+        return self.icon

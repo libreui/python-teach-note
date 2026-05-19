@@ -17,11 +17,10 @@ A Python implementation of the classic Flappy Bird game using Pygame.
 - [x] 管道生成与随机高度
 - [x] 管道无限滚动
 - [x] 管道碰撞检测
+- [x] 分数计算与显示（跳过管道+1分，实时显示）
 
 ### ⏳ To Develop (待开发)
 
-- [ ] 分数计算与显示
-- [ ] 分数计算与显示
 - [ ] 音效系统（跳跃、碰撞、得分）
 - [ ] 游戏开始界面
 - [ ] 游戏结束界面（显示分数）

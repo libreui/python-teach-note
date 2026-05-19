@@ -13,6 +13,9 @@ class Pipe(Sprite):
         self.config = Config()
         self.resource = ResourceManager()
 
+        # 管道是否被积分
+        self.scored = False
+
         # 加载管道图片
         self.pipe_image = self.resource.get_pipe_images()[self.config.PIPE_COLOR]
         self.pipe_image_top = pygame.transform.flip(self.pipe_image, False, True)
@@ -73,7 +76,8 @@ class PipeGroup:
         self.pipe_spacing = self.config.PIPE_SPACING  # 管道水平间距（右边缘到右边缘）
         self.buffer_distance = self.config.WIDTH // 2  # 预生成距离（屏幕外多远开始生成）
 
-        # 生成初始管道（包含预生成的管道）
+    def build(self):
+        """构建所有管道"""
         self._spawn_initial_pipes()
 
     def _spawn_initial_pipes(self):
@@ -144,3 +148,22 @@ class PipeGroup:
                     bird.rotated_rect.colliderect(pipe.bottom_rect):
                 return True
         return False
+
+    def reset(self):
+        """重置所有管道"""
+
+        self.pipes.empty()
+        # self._spawn_initial_pipes()
+
+    def check_score(self, bird):
+        """检测小鸟是否通过管道并计分"""
+        score_increment = 0
+        for pipe in self.pipes:
+            # 当小鸟的中心通过管道空隙的中心位置时计分
+            # 这样视觉上更及时，不会有延迟感
+            pipe_center_x = pipe.top_rect.centerx
+            bird_center_x = bird.rotated_rect.centerx
+            if not pipe.scored and bird_center_x > pipe_center_x:
+                pipe.scored = True
+                score_increment += 1
+        return score_increment
