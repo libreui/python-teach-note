@@ -18,7 +18,7 @@ balls = []  # 小球列表，每个元素: [x, y, vx, vy]
 launch_interval = 2  # 发射间隔帧数 (0.5秒 at 60FPS)
 frame_count = 0
 launched_count = 0
-max_balls = 100
+max_balls = 1
 
 center_x = screen_rect.centerx
 center_y = screen_rect.centery
