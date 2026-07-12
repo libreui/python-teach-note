@@ -83,11 +83,6 @@ def game_loop():
     while not game_over:
         # 如果游戏结束但未选择退出或重玩， 则进入次循环
         while game_close:
-            # 清空屏幕准备下一轮游戏
-            SCREEN.fill(BLACK)
-            draw_result(snake_length)
-            pygame.display.update()  # 更新屏幕
-
             # 监听键盘事件
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
@@ -96,6 +91,13 @@ def game_loop():
                         game_close = False
                     if event.key == pygame.K_c:
                         game_loop()
+
+            # 清空屏幕准备下一轮游戏
+            SCREEN.fill(BLACK)
+            draw_result(snake_length)
+            pygame.display.update()  # 更新屏幕
+
+
 
         # 监听键盘事件
         for event in pygame.event.get():

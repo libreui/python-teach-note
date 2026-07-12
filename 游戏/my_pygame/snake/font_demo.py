@@ -24,14 +24,13 @@ def _draw():
     pass
 
 
-_crate()
-
-
 def show_font(txt):
     # 2. 获取文字对象的render(渲染对象)
     font_render = font.render(txt, True, (255, 255, 255))
     # 3. 绘制到屏幕(Surface)
     screen.blit(font_render, font_render.get_rect())
+
+_crate()
 
 
 while True:
