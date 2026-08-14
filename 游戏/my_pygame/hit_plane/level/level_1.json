@@ -1,0 +1,67 @@
+{
+  "level_name": "第一关：初露锋芒",
+  "total_time": 120,
+  "events": [
+    {
+      "time": 3,
+      "type": "enemy_wave",
+      "params": {
+        "count": 5,
+        "position": "left",
+        "movement": "straight_down",
+        "size": "small",
+        "speed": 2,
+        "health": 1
+      }
+    },
+    {
+      "time": 8,
+      "type": "enemy_wave",
+      "params": {
+        "count": 5,
+        "position": "right",
+        "movement": "zigzag",
+        "size": "small",
+        "speed": 1.8,
+        "health": 1
+      }
+    },
+    {
+      "time": 15,
+      "type": "enemy_wave",
+      "params": {
+        "count": 4,
+        "position": "center",
+        "movement": "straight_down",
+        "size": "medium",
+        "speed": 1.5,
+        "health": 3
+      }
+    },
+    {
+      "time": 30,
+      "type": "enemy_wave",
+      "params": {
+        "count": 6,
+        "position": "random",
+        "movement": "zigzag",
+        "size": "medium",
+        "speed": 2.2,
+        "health": 1
+      }
+    },
+    {
+      "time": 100,
+      "type": "boss",
+      "params": {
+        "name": "精英敌机",
+        "count": 1,
+        "health": 50,
+        "position": "center",
+        "movement": "hover_attack",
+        "size": "large",
+        "speed": 1.2
+      }
+    }
+  ]
+}
