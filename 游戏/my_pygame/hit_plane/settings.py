@@ -12,9 +12,14 @@ class Settings:
         self.scale = 0.7
 
         # 子弹设置
-        self.bullet_color = (255, 255, 255)
+        self.bullet_color = (255, 165, 0)
         self.bullet_speed = 15.5
         self.bullet_radius = 5
+
+        # 敌人子弹设置
+        self.enemy_bullet_color = (255, 255, 255)
+        self.enemy_bullet_speed = 10
+        self.enemy_bullet_radius = 3
 
         # 敌人设置
         self.enemy_speed = 1.5

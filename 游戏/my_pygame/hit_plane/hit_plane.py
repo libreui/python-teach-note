@@ -5,6 +5,7 @@ from bullets import Bullet
 from enemys import Enemys
 from map import Map
 from level import Level
+from enemy_bullets import EnemyBullet
 
 
 class HitPlane:
@@ -17,6 +18,7 @@ class HitPlane:
             (self.settings.screen_width,
              self.settings.screen_height)
         )
+        self.sr = self.screen.get_rect()
         pygame.display.set_caption("Plane Hit")
         self.plane = Plane(self)
 
@@ -39,7 +41,7 @@ class HitPlane:
             self.timer += 1
             self.level.trigger_event(self.timer // 60)
 
-            self.create_enemy()
+            self._create_enemy()
 
             self.map.update()
             self._update_plane()
@@ -52,6 +54,15 @@ class HitPlane:
             enemy.update()
             if enemy.check_edge():
                 self.enemys.remove(enemy)
+
+            enemy.fire()
+
+            # 更新敌机子弹
+            self._update_enemy_bullets(enemy)
+
+    def _update_enemy_bullets(self, enemy):
+        for enemy_bullet in enemy.bullets.sprites():
+            enemy_bullet.update()
 
     def _update_bullets(self):
         self.bullets.update()
@@ -72,10 +83,15 @@ class HitPlane:
         self.screen.fill((20, 20, 20))
         self.map.show_map()
         self.plane.show_plane()
+
         for bullet in self.bullets.sprites():
             bullet.draw_bullet()
         for enemy in self.enemys.sprites():
             enemy.draw_enemy()
+            for enemy_bullet in enemy.bullets.sprites():
+                enemy_bullet.show_bullet()
+
+
         pygame.display.flip()
         self.clock.tick(self.settings.fps)
 
@@ -97,13 +113,13 @@ class HitPlane:
         new_bullet = Bullet(self)
         self.bullets.add(new_bullet)
 
-    def create_enemy(self):
+    def _create_enemy(self):
         """创建敌人"""
         event = self.level.get_current_event()
         if event is None:
             return
 
-        # TODO: 创建敌人,根据事件类型
+        # 创建敌人,根据事件类型
         enemys = []
         # if event['type'] == 'enemy_wave':
         params = event['params']
@@ -114,6 +130,7 @@ class HitPlane:
             new_enemy.set_size(params['size'])
             new_enemy.set_position(i, count, params['position'])
             new_enemy.set_health(params['health'])
+            new_enemy.set_bullets(params['bullets'])
             enemys.append(new_enemy)
         self.enemys.add(enemys)
         self.level.complete_event()
