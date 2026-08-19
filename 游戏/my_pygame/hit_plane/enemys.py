@@ -41,11 +41,9 @@ class Enemys(Sprite):
         self.health = 1
 
         # 发射子弹计数器
-        self.bullets_timer = 0
         self.bullets_num = 0
-        self.bullets = pygame.sprite.Group()
 
-    def set_bullets(self, n, t='line'):
+    def set_bullets(self, n):
         self.bullets_num = n
 
     def set_health(self, health):
@@ -169,15 +167,5 @@ class Enemys(Sprite):
             if self.x <= 0 or self.x >= self.screen_rect.width - self.rect.width:
                 self.direction *= -1
 
-    def fire(self):
-        """发射子弹"""
-        self.bullets_timer += 1
-        # 每隔120帧发射一次子弹
-        if self.bullets_timer % 60 == 0:
-            for i in range(self.bullets_num):
-                bullet = EnemyBullet(self)
-                self.bullets.add(bullet)
 
-            self.bullets_num -= 1
-            self.bullets_timer = 0
 

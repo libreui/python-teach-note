@@ -12,7 +12,7 @@
         "size": "small",
         "speed": 2,
         "health": 1,
-        "bullets": 1
+        "bullets": 3
       }
     },
     {
@@ -25,7 +25,7 @@
         "size": "small",
         "speed": 1.8,
         "health": 1,
-        "bullets": 0
+        "bullets": 1
       }
     },
     {

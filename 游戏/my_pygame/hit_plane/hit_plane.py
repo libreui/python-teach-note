@@ -1,3 +1,5 @@
+import math
+
 import pygame
 from plane import Plane
 from settings import Settings
@@ -24,6 +26,8 @@ class HitPlane:
 
         self.bullets = pygame.sprite.Group()
         self.enemys = pygame.sprite.Group()
+        self.enemys_bullets = pygame.sprite.Group()
+        self.bullets_fire_type = 'line'
 
         self.map = Map(self)
 
@@ -32,14 +36,14 @@ class HitPlane:
 
         # 计时器
         self.timer = 0
+        self.bullets_timer = 0
 
     def run_game(self):
         while True:
             self._check_events()
 
             # 更新计时器
-            self.timer += 1
-            self.level.trigger_event(self.timer // 60)
+            self._update_timer()
 
             self._create_enemy()
 
@@ -47,7 +51,15 @@ class HitPlane:
             self._update_plane()
             self._update_bullets()
             self._update_enemys()
+            self._update_enemy_bullets()
             self._update_screen()
+
+            self.clock.tick(self.settings.fps)
+
+    def _update_timer(self):
+        self.timer += 1
+        self.level.trigger_event(self.timer // 60)
+        self.bullets_timer += 1
 
     def _update_enemys(self):
         for enemy in self.enemys.sprites().copy():
@@ -55,13 +67,12 @@ class HitPlane:
             if enemy.check_edge():
                 self.enemys.remove(enemy)
 
-            enemy.fire()
+            # 更新敌机发射子弹
+            self._update_enemys_fire(enemy)
 
-            # 更新敌机子弹
-            self._update_enemy_bullets(enemy)
 
-    def _update_enemy_bullets(self, enemy):
-        for enemy_bullet in enemy.bullets.sprites():
+    def _update_enemy_bullets(self):
+        for enemy_bullet in self.enemys_bullets.sprites():
             enemy_bullet.update()
 
     def _update_bullets(self):
@@ -88,12 +99,11 @@ class HitPlane:
             bullet.draw_bullet()
         for enemy in self.enemys.sprites():
             enemy.draw_enemy()
-            for enemy_bullet in enemy.bullets.sprites():
-                enemy_bullet.show_bullet()
+        for enemy_bullet in self.enemys_bullets.sprites():
+            enemy_bullet.show_bullet()
 
 
         pygame.display.flip()
-        self.clock.tick(self.settings.fps)
 
     def _check_events(self):
         for event in pygame.event.get():
@@ -134,6 +144,25 @@ class HitPlane:
             enemys.append(new_enemy)
         self.enemys.add(enemys)
         self.level.complete_event()
+
+
+    def _update_enemys_fire(self, enemy):
+        """发射子弹"""
+        if self.bullets_timer % 200 != 0:
+            return
+
+        # 以正下方(90°)为中心，相邻子弹间隔 15° 对称分布
+        # (n=1 时 offset=0 → 垂直向下，即单发)
+        n = enemy.bullets_num
+        for i in range(n):
+            bullet = EnemyBullet(enemy)
+            offset = (i - (n - 1) / 2) * 15
+            angle = math.radians(90 + offset)
+            bullet.dx = math.cos(angle) * self.settings.enemy_bullet_speed
+            bullet.dy = math.sin(angle) * self.settings.enemy_bullet_speed
+            self.enemys_bullets.add(bullet)
+        enemy.bullets_num = 0
+        self.bullets_timer = 0
 
 
 

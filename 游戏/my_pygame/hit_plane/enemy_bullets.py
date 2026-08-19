@@ -16,7 +16,7 @@ class EnemyBullet(Sprite):
 
     def update(self):
         self.x += self.dx
-        self.y += 2 + self.settings.enemy_speed
+        self.y += self.dy
         self.rect.x = self.x
         self.rect.x = self.y
         if self.y > self.screen.get_rect().bottom:

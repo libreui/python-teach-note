@@ -18,7 +18,7 @@ class Settings:
 
         # 敌人子弹设置
         self.enemy_bullet_color = (255, 255, 255)
-        self.enemy_bullet_speed = 10
+        self.enemy_bullet_speed = 5
         self.enemy_bullet_radius = 3
 
         # 敌人设置
